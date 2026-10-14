@@ -19,24 +19,44 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <!-- Icons: one 24px line set, so every icon sits on the same centre -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20V12M12 20V5M19 20v-9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+      <symbol id="i-sliders" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h9M19 7h1M4 17h3M13 17h7"/><circle cx="16" cy="7" r="2.5"/><circle cx="10" cy="17" r="2.5"/></g></symbol>
+      <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 7V4.5h4V7M6.5 7l1 12.5h9l1-12.5M10 11v5M14 11v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.8l2.5 5.2 5.7.7-4.2 3.9 1.1 5.6L12 16.5l-5.1 2.7 1.1-5.6-4.2-3.9 5.7-.7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+      <symbol id="i-again" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M5 3.5v4h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
+      <symbol id="flag-fr" viewBox="0 0 30 30"><clipPath id="cf"><circle cx="15" cy="15" r="15"/></clipPath><g clip-path="url(#cf)"><rect width="10" height="30" fill="#0055a4"/><rect x="10" width="10" height="30" fill="#fff"/><rect x="20" width="10" height="30" fill="#ef4135"/></g></symbol>
+      <symbol id="flag-en" viewBox="0 0 30 30"><clipPath id="ce"><circle cx="15" cy="15" r="15"/></clipPath><g clip-path="url(#ce)"><rect width="30" height="30" fill="#012169"/><path d="M0 0l30 30M30 0L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l30 30M30 0L0 30" stroke="#c8102e" stroke-width="2"/><path d="M15 0v30M0 15h30" stroke="#fff" stroke-width="10"/><path d="M15 0v30M0 15h30" stroke="#c8102e" stroke-width="6"/></g></symbol>
+    </defs>
+  </svg>
+
   <!-- Home: start a workout, or the workout in progress -->
   <section id="screen-home" class="screen active">
-    <header class="topbar">
-      <button id="go-history" class="icon-btn" aria-label="History"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20V12M12 20V5M19 20v-9"/></svg></button>
-      <span id="clock" class="progress">Gym</span>
-      <button id="go-settings" class="icon-btn" aria-label="Settings">⚙</button>
+    <header class="topbar wide">
+      <button id="go-history" class="icon-btn" data-i18n-aria="history"><svg class="ic" aria-hidden="true"><use href="#i-chart"/></svg></button>
+      <span id="clock" class="progress"></span>
+      <span class="side">
+        <button id="lang" class="icon-btn lang" type="button"><svg class="flag" aria-hidden="true"><use id="lang-use" href="#flag-en"/></svg></button>
+        <button id="go-settings" class="icon-btn" data-i18n-aria="settings"><svg class="ic" aria-hidden="true"><use href="#i-sliders"/></svg></button>
+      </span>
     </header>
 
     <!-- no workout running -->
     <div id="home-idle" class="scroll">
       <div class="hero">
         <div class="brand"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg></div>
-        <h1 class="title">Ready?</h1>
+        <h1 class="title" data-i18n="ready"></h1>
         <p id="idle-sub" class="hint center"></p>
       </div>
-      <button id="start-empty" class="btn primary wide">Start workout</button>
+      <button id="start-empty" class="btn primary wide" data-i18n="start"></button>
       <div id="tpl-wrap">
-        <div class="section-label">Trainings</div>
+        <div class="section-label" data-i18n="trainings"></div>
         <div id="tpl-list" class="card-list"></div>
       </div>
     </div>
@@ -44,10 +64,10 @@
     <!-- workout running -->
     <div id="home-active" class="scroll" hidden>
       <div id="ex-list" class="card-list"></div>
-      <button id="add-ex" class="add-ex" type="button"><span>+</span> Add exercise</button>
+      <button id="add-ex" class="add-ex" type="button"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg><span data-i18n="addEx"></span></button>
       <div class="row finish-row">
-        <button id="save-tpl" class="btn ghost small grow" type="button">☆ Save as training</button>
-        <button id="finish" class="btn small grow finish-btn" type="button">Finish workout</button>
+        <button id="save-tpl" class="btn ghost small with-ic" type="button"><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg><span data-i18n="saveTpl"></span></button>
+        <button id="finish" class="btn finish-btn" type="button" data-i18n="finish"></button>
       </div>
     </div>
 
@@ -56,26 +76,26 @@
       <svg class="rest-ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="rr-track"/><circle id="rest-arc" cx="22" cy="22" r="19" class="rr-arc"/></svg>
       <div class="rest-main">
         <div id="rest-time" class="rest-time">1:30</div>
-        <div id="rest-label" class="rest-label">Rest</div>
+        <div id="rest-label" class="rest-label"></div>
       </div>
       <button id="rest-minus" class="rest-btn" type="button">−15</button>
       <button id="rest-plus" class="rest-btn" type="button">+15</button>
-      <button id="rest-skip" class="rest-btn skip" type="button">Skip</button>
+      <button id="rest-skip" class="rest-btn skip" type="button" data-i18n="skip"></button>
     </div>
   </section>
 
   <!-- Pick an exercise: body part + name -->
   <section id="screen-pick" class="screen">
     <header class="topbar">
-      <button id="pick-back" class="icon-btn" aria-label="Back">‹</button>
-      <span class="progress">Add exercise</span>
-      <span class="icon-btn" aria-hidden="true"></span>
+      <button id="pick-back" class="icon-btn" data-i18n-aria="back"><svg class="ic" aria-hidden="true"><use href="#i-back"/></svg></button>
+      <span class="progress" data-i18n="addEx"></span>
+      <span></span>
     </header>
     <div class="scroll pick">
       <div id="parts" class="chips scroll-x"></div>
       <div class="name-row">
-        <input id="ex-name" class="field" type="text" enterkeyhint="next" autocomplete="off" autocapitalize="sentences" placeholder="Exercise name" />
-        <button id="name-next" class="btn primary" type="button" hidden>Next</button>
+        <input id="ex-name" class="field" type="text" enterkeyhint="next" autocomplete="off" autocapitalize="sentences" data-i18n-ph="exName" />
+        <button id="name-next" class="btn primary" type="button" data-i18n="next" hidden></button>
       </div>
       <div id="suggest" class="suggest-list"></div>
     </div>
@@ -84,18 +104,17 @@
   <!-- The wheel: weight, reps, sets, rest on one screen -->
   <section id="screen-wheel" class="screen">
     <header class="topbar">
-      <button id="wheel-back" class="icon-btn" aria-label="Back">‹</button>
-      <span class="wheel-title"><span id="wheel-name"></span><span id="wheel-part" class="part-tag"></span></span>
-      <button id="wheel-del" class="icon-btn del" aria-label="Remove exercise" hidden>🗑</button>
-      <span id="wheel-spacer" class="icon-btn" aria-hidden="true"></span>
+      <button id="wheel-back" class="icon-btn" data-i18n-aria="back"><svg class="ic" aria-hidden="true"><use href="#i-back"/></svg></button>
+      <span class="wheel-title"><span id="wheel-name"></span><button id="wheel-part" class="part-tag" type="button"></button></span>
+      <span class="side"><button id="wheel-del" class="icon-btn del" data-i18n-aria="remove" hidden><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg></button></span>
     </header>
 
     <div class="wheel-body">
       <div id="fields" class="fields">
-        <button class="fcell" data-f="kg"><span class="fl">Weight</span><b data-v="kg"></b></button>
-        <button class="fcell" data-f="reps"><span class="fl">Reps</span><b data-v="reps"></b></button>
-        <button class="fcell" data-f="sets"><span class="fl">Sets</span><b data-v="sets"></b></button>
-        <button class="fcell" data-f="rest"><span class="fl">Rest</span><b data-v="rest"></b></button>
+        <button class="fcell" data-f="kg"><span class="fl" data-i18n="f_kg"></span><b data-v="kg"></b></button>
+        <button class="fcell" data-f="reps"><span class="fl" data-i18n="f_reps"></span><b data-v="reps"></b></button>
+        <button class="fcell" data-f="sets"><span class="fl" data-i18n="f_sets"></span><b data-v="sets"></b></button>
+        <button class="fcell" data-f="rest"><span class="fl" data-i18n="f_rest"></span><b data-v="rest"></b></button>
       </div>
 
       <div id="wheel" class="wheel">
@@ -113,7 +132,7 @@
           <circle id="w-last" cx="150" cy="22" r="5" class="w-last"/>
           <circle id="w-thumb" cx="150" cy="22" r="15" class="w-thumb"/>
         </svg>
-        <button id="w-center" class="w-center" type="button" aria-label="Type a value">
+        <button id="w-center" class="w-center" type="button" data-i18n-aria="type">
           <span id="w-value" class="w-value">0</span>
           <span id="w-unit" class="w-unit">kg</span>
           <span id="w-note" class="w-note"></span>
@@ -123,27 +142,27 @@
       </div>
 
       <div id="presets" class="chips presets"></div>
-      <button id="wheel-go" class="btn primary wide">Next</button>
+      <button id="wheel-go" class="btn primary wide"></button>
     </div>
   </section>
 
   <!-- Workout finished -->
   <section id="screen-done" class="screen pad">
     <div class="stack center">
-      <div class="check">✓</div>
-      <div class="saved-amount">Workout saved</div>
+      <div class="check"><svg class="ic big" aria-hidden="true"><use href="#i-check"/></svg></div>
+      <div class="saved-amount" data-i18n="saved"></div>
       <div id="done-stats" class="done-stats"></div>
-      <button id="done-tpl" class="btn wide" type="button">☆ Save as training</button>
-      <button id="done-ok" class="btn primary wide" type="button">Done</button>
+      <button id="done-tpl" class="btn wide with-ic" type="button"><svg class="ic" aria-hidden="true"><use href="#i-star"/></svg><span data-i18n="saveTpl"></span></button>
+      <button id="done-ok" class="btn primary wide" type="button" data-i18n="done"></button>
     </div>
   </section>
 
   <!-- History -->
   <section id="screen-history" class="screen">
     <header class="topbar">
-      <button id="hist-back" class="icon-btn" aria-label="Back">‹</button>
-      <span class="progress">History</span>
-      <span class="icon-btn" aria-hidden="true"></span>
+      <button id="hist-back" class="icon-btn" data-i18n-aria="back"><svg class="ic" aria-hidden="true"><use href="#i-back"/></svg></button>
+      <span class="progress" data-i18n="history"></span>
+      <span></span>
     </header>
     <div id="hist-list" class="scroll"></div>
   </section>
@@ -151,34 +170,34 @@
   <!-- Settings -->
   <section id="screen-settings" class="screen">
     <header class="topbar">
-      <button id="set-back" class="icon-btn" aria-label="Back">‹</button>
-      <span class="progress">Settings</span>
-      <span class="icon-btn" aria-hidden="true"></span>
+      <button id="set-back" class="icon-btn" data-i18n-aria="back"><svg class="ic" aria-hidden="true"><use href="#i-back"/></svg></button>
+      <span class="progress" data-i18n="settings"></span>
+      <span></span>
     </header>
     <div class="scroll">
-      <div class="section-label">Feel</div>
-      <button id="opt-sound" class="opt" type="button"><span>Click sound on the wheel<small>Plays alongside the haptic tick. Doesn't stop your music.</small></span><i class="tog"></i></button>
-      <button id="opt-awake" class="opt" type="button"><span>Keep screen on during a workout<small>So the rest timer stays in view.</small></span><i class="tog"></i></button>
+      <div class="section-label" data-i18n="feel"></div>
+      <button id="opt-sound" class="opt" type="button"><span><span data-i18n="sound"></span><small data-i18n="soundSub"></small></span><i class="tog"></i></button>
+      <button id="opt-awake" class="opt" type="button"><span><span data-i18n="awake"></span><small data-i18n="awakeSub"></small></span><i class="tog"></i></button>
 
-      <div class="section-label">Your data</div>
-      <p class="hint small-hint">Everything is stored on this phone only. Export a backup now and then, and import it on a new phone.</p>
+      <div class="section-label" data-i18n="data"></div>
+      <p class="hint small-hint" data-i18n="dataHint"></p>
       <div class="row">
-        <button id="export" class="btn grow" type="button">Export backup</button>
-        <button id="import" class="btn grow" type="button">Import</button>
+        <button id="export" class="btn grow" type="button" data-i18n="export"></button>
+        <button id="import" class="btn grow" type="button" data-i18n="import"></button>
       </div>
       <input id="import-file" type="file" accept="application/json,.json" hidden />
-      <button id="wipe" class="btn ghost small wide danger-txt" type="button">Erase all data</button>
+      <button id="wipe" class="btn ghost small wide danger-txt" type="button" data-i18n="wipe"></button>
     </div>
   </section>
 
   <!-- Name prompt (save as training) -->
   <div id="sheet" class="sheet" hidden>
     <div class="sheet-card">
-      <div class="section-label">Name this training</div>
-      <input id="sheet-input" class="field" type="text" enterkeyhint="done" autocomplete="off" autocapitalize="words" placeholder="e.g. Push day" />
+      <div class="section-label" data-i18n="nameTpl"></div>
+      <input id="sheet-input" class="field" type="text" enterkeyhint="done" autocomplete="off" autocapitalize="words" data-i18n-ph="nameTplPh" />
       <div class="row">
-        <button id="sheet-cancel" class="btn ghost grow" type="button">Cancel</button>
-        <button id="sheet-ok" class="btn primary grow" type="button">Save</button>
+        <button id="sheet-cancel" class="btn ghost grow" type="button" data-i18n="cancel"></button>
+        <button id="sheet-ok" class="btn primary grow" type="button" data-i18n="save"></button>
       </div>
     </div>
   </div>

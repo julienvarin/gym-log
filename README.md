@@ -25,6 +25,8 @@ round button each time you finish a set; the rest timer starts on its own.
   screen — it fills in the values you used last time. From History, *Do again* repeats any
   past workout.
 - **History.** Every finished workout with time, sets and total weight lifted.
+- **English / Français.** Tap the round flag at the top of the home screen to switch. It
+  starts in French if your phone is set to French. Exercise ideas come in both languages.
 
 No build step, no framework, no account — plain HTML/CSS/JS.
 
@@ -57,6 +59,7 @@ a native app.
 ## Customising
 
 - **Exercise ideas / body parts:** `PARTS` and `STARTERS` at the top of [`js/app.js`](js/app.js).
+- **Wording, in both languages:** `STR` just below.
 - **Wheel steps and chips:** `FIELDS` and `PRESETS` just below.
 - **Colours / look:** the CSS variables at the top of [`css/style.css`](css/style.css).
 - **App icon:** re-run `python3 scripts/gen_icons.py` after tweaking the colours there.

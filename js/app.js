@@ -5,15 +5,101 @@
 /* ------------------------------------------------------------------ */
 const PARTS = ["Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio"];
 
-// Ideas shown before you've logged an exercise yourself.
+// Ideas shown before you've logged an exercise yourself, per language.
+// Body parts are stored by their English key and only translated on screen.
 const STARTERS = {
-  Chest: ["Bench press", "Incline dumbbell press", "Chest fly", "Push-ups", "Dips"],
-  Back: ["Deadlift", "Pull-ups", "Barbell row", "Lat pulldown", "Seated cable row"],
-  Legs: ["Squat", "Leg press", "Romanian deadlift", "Lunges", "Leg curl", "Leg extension", "Calf raise"],
-  Shoulders: ["Overhead press", "Lateral raise", "Rear delt fly", "Face pull"],
-  Arms: ["Biceps curl", "Hammer curl", "Triceps pushdown", "Skull crusher"],
-  Core: ["Plank", "Hanging leg raise", "Cable crunch", "Russian twist"],
-  Cardio: ["Rowing", "Bike", "Treadmill", "Jump rope"],
+  en: {
+    Chest: ["Bench press", "Incline dumbbell press", "Chest fly", "Push-ups", "Dips"],
+    Back: ["Deadlift", "Pull-ups", "Barbell row", "Lat pulldown", "Seated cable row"],
+    Legs: ["Squat", "Leg press", "Romanian deadlift", "Lunges", "Leg curl", "Leg extension", "Calf raise"],
+    Shoulders: ["Overhead press", "Lateral raise", "Rear delt fly", "Face pull"],
+    Arms: ["Biceps curl", "Hammer curl", "Triceps pushdown", "Skull crusher"],
+    Core: ["Plank", "Hanging leg raise", "Cable crunch", "Russian twist"],
+    Cardio: ["Rowing", "Bike", "Treadmill", "Jump rope"],
+  },
+  fr: {
+    Chest: ["Développé couché", "Développé incliné haltères", "Écarté", "Pompes", "Dips"],
+    Back: ["Soulevé de terre", "Tractions", "Rowing barre", "Tirage vertical", "Tirage horizontal"],
+    Legs: ["Squat", "Presse à cuisses", "Soulevé de terre jambes tendues", "Fentes", "Leg curl", "Leg extension", "Mollets"],
+    Shoulders: ["Développé militaire", "Élévations latérales", "Oiseau", "Face pull"],
+    Arms: ["Curl biceps", "Curl marteau", "Extension triceps poulie", "Barre au front"],
+    Core: ["Gainage", "Relevé de jambes suspendu", "Crunch à la poulie", "Russian twist"],
+    Cardio: ["Rameur", "Vélo", "Tapis de course", "Corde à sauter"],
+  },
+};
+
+// Every word on screen. A function takes the values it shows.
+const NB = "\u00a0"; // French puts a non-breaking space before ? ! :
+const STR = {
+  en: {
+    locale: "en-GB", gym: "Gym", restGo: "Go!", history: "History", settings: "Settings", back: "Back", remove: "Remove exercise",
+    langSwitch: "Passer en français", type: "Type a value",
+    ready: "Ready?", start: "Start workout", trainings: "Trainings", addEx: "Add exercise",
+    saveTpl: "Save as training", tplShort: "Save training", finish: "Finish workout", skip: "Skip", rest: "Rest",
+    exName: "Exercise name", next: "Next", f_kg: "Weight", f_reps: "Reps", f_sets: "Sets", f_rest: "Rest",
+    saved: "Workout saved", done: "Done", feel: "Feel",
+    sound: "Click sound on the wheel", soundSub: "Plays alongside the haptic tick. Doesn't stop your music.",
+    awake: "Keep screen on during a workout", awakeSub: "So the rest timer stays in view.",
+    data: "Your data", dataHint: "Everything is stored on this phone only. Export a backup now and then, and import it on a new phone.",
+    export: "Export backup", import: "Import", wipe: "Erase all data",
+    nameTpl: "Name this training", nameTplPh: "e.g. Push day", cancel: "Cancel", save: "Save",
+    idleNone: "Tap start, pick an exercise, spin the wheel.",
+    idleLast: (d, n) => "Last workout " + d + (n ? " · " + n : ""),
+    go: "Start", delTpl: "Delete training", deleted: (n) => "Deleted “" + n + "”", undo: "Undo",
+    bw: "Bodyweight", bwShort: "BW", sets: "sets", restWord: "rest", reps: "reps",
+    setDone: "Set done", exDone: (n) => n + " is done",
+    nextSet: (i, n) => "Next: set " + i + "/" + n, nextEx: (n) => "Next: " + n,
+    allDone: "All sets done. Tap Finish when you're ready.",
+    all: "All", yours: "Yours", ideas: "Ideas", pickOne: "Pick one", addPart: "+ body part",
+    Chest: "Chest", Back: "Back", Legs: "Legs", Shoulders: "Shoulders", Arms: "Arms", Core: "Core", Cardio: "Cardio",
+    best: "New best!", plusKg: (d) => "+" + d + " kg vs last", plusReps: (d) => "+" + d + " vs last",
+    same: "Same as last time", lastKg: (v) => "Last: " + v + " kg", lastReps: (v) => "Last: " + v, lastChip: (v) => "Last " + v,
+    addTo: "Add to workout", startWith: "Start with this",
+    removed: (n) => "Removed " + n, added: (n) => "Added " + n,
+    discarded: "Nothing ticked, workout discarded",
+    sTime: "time", sSets: "sets", sLifted: "lifted",
+    tplSaved: (n) => "Saved “" + n + "”", tplUpdated: (n) => "Updated “" + n + "”",
+    noWorkouts: "No workouts yet.<br />Finish one and it shows up here.",
+    again: "Do again", del: "Delete", finishFirst: "Finish the current workout first", wDeleted: "Workout deleted",
+    replace: (n) => "Replace what's on this phone with this backup (" + n + " workouts)?",
+    imported: "Backup imported", badBackup: "That isn't a Gym Log backup",
+    wipeQ: "Erase every workout and training on this phone?", erased: "Erased", saveFail: "Couldn't save on this phone",
+  },
+  fr: {
+    locale: "fr-FR", gym: "Muscu", restGo: "Go" + NB + "!", history: "Historique", settings: "Réglages", back: "Retour", remove: "Retirer l'exercice",
+    langSwitch: "Switch to English", type: "Saisir une valeur",
+    ready: "Prêt" + NB + "?", start: "Commencer la séance", trainings: "Entraînements", addEx: "Ajouter un exercice",
+    saveTpl: "Enregistrer l'entraînement", tplShort: "Sauvegarder", finish: "Terminer la séance", skip: "Passer", rest: "Repos",
+    exName: "Nom de l'exercice", next: "Suivant", f_kg: "Poids", f_reps: "Rép.", f_sets: "Séries", f_rest: "Repos",
+    saved: "Séance enregistrée", done: "Terminé", feel: "Ressenti",
+    sound: "Son de clic sur la molette", soundSub: "En plus du retour haptique. Ne coupe pas ta musique.",
+    awake: "Garder l'écran allumé pendant la séance", awakeSub: "Pour garder le minuteur de repos sous les yeux.",
+    data: "Tes données", dataHint: "Tout est stocké sur ce téléphone uniquement. Exporte une sauvegarde de temps en temps, et importe-la sur un nouveau téléphone.",
+    export: "Exporter une sauvegarde", import: "Importer", wipe: "Tout effacer",
+    nameTpl: "Nommer cet entraînement", nameTplPh: "ex. Haut du corps", cancel: "Annuler", save: "Enregistrer",
+    idleNone: "Commence, choisis un exercice, tourne la molette.",
+    idleLast: (d, n) => "Dernière séance " + d + (n ? " · " + n : ""),
+    go: "Go", delTpl: "Supprimer l'entraînement", deleted: (n) => "« " + n + " » supprimé", undo: "Annuler",
+    bw: "Poids du corps", bwShort: "PDC", sets: "séries", restWord: "repos", reps: "rép.",
+    setDone: "Série faite", exDone: (n) => n + " : terminé",
+    nextSet: (i, n) => "Puis série " + i + "/" + n, nextEx: (n) => "Puis " + n,
+    allDone: "Toutes les séries sont faites. Termine la séance quand tu veux.",
+    all: "Tout", yours: "Les tiens", ideas: "Idées", pickOne: "Choisis", addPart: "+ zone",
+    Chest: "Pectoraux", Back: "Dos", Legs: "Jambes", Shoulders: "Épaules", Arms: "Bras", Core: "Abdos", Cardio: "Cardio",
+    best: "Record" + NB + "!", plusKg: (d) => "+" + d + " kg vs la dernière fois", plusReps: (d) => "+" + d + " vs la dernière fois",
+    same: "Comme la dernière fois", lastKg: (v) => "Dernière fois" + NB + ": " + v + " kg", lastReps: (v) => "Dernière fois" + NB + ": " + v,
+    lastChip: (v) => "Dernier " + v,
+    addTo: "Ajouter à la séance", startWith: "Commencer avec",
+    removed: (n) => n + " retiré", added: (n) => n + " ajouté",
+    discarded: "Rien de coché, séance annulée",
+    sTime: "durée", sSets: "séries", sLifted: "soulevés",
+    tplSaved: (n) => "« " + n + " » enregistré", tplUpdated: (n) => "« " + n + " » mis à jour",
+    noWorkouts: "Aucune séance pour l'instant.<br />Termine-en une et elle apparaîtra ici.",
+    again: "Refaire", del: "Supprimer", finishFirst: "Termine d'abord la séance en cours", wDeleted: "Séance supprimée",
+    replace: (n) => "Remplacer les données de ce téléphone par cette sauvegarde (" + n + " séances)" + NB + "?",
+    imported: "Sauvegarde importée", badBackup: "Ce n'est pas une sauvegarde Gym Log",
+    wipeQ: "Effacer toutes les séances et entraînements de ce téléphone" + NB + "?", erased: "Effacé", saveFail: "Impossible d'enregistrer sur ce téléphone",
+  },
 };
 const DEFAULTS = { kg: 20, reps: 10, sets: 3, rest: 90 };
 
@@ -42,7 +128,8 @@ const STORE = "gymlog.v1";
 let state = load();
 
 function blank() {
-  return { workouts: [], templates: [], active: null, settings: { sound: true, awake: true } };
+  const lang = /^fr/i.test(navigator.language || "") ? "fr" : "en";
+  return { workouts: [], templates: [], active: null, settings: { sound: true, awake: true, lang } };
 }
 
 function load() {
@@ -58,12 +145,24 @@ function load() {
 
 function save() {
   try { localStorage.setItem(STORE, JSON.stringify(state)); }
-  catch (e) { toast("Couldn't save on this phone", true); }
+  catch (e) { toast(t("saveFail"), true); }
 }
 
 // For undo: a copy of everything before a destructive change.
 const snapshot = () => JSON.stringify(state);
 function restore(snap) { state = JSON.parse(snap); save(); renderHome(); }
+
+/* ------------------------------------------------------------------ */
+/*  Language                                                           */
+/* ------------------------------------------------------------------ */
+const lang = () => (state.settings.lang === "fr" ? "fr" : "en");
+function t(k, ...args) {
+  const v = STR[lang()][k] ?? STR.en[k] ?? k;
+  return typeof v === "function" ? v(...args) : v;
+}
+const partName = (p) => (p ? t(p) : "");
+// Small inline icon from the sprite in index.html.
+const ic = (name, cls) => '<svg class="ic' + (cls ? " " + cls : "") + '" aria-hidden="true"><use href="#i-' + name + '"/></svg>';
 
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
@@ -76,6 +175,7 @@ const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 function showScreen(id) {
   $$(".screen").forEach((s) => s.classList.remove("active"));
   $("#" + id).classList.add("active");
+  $("#toast").hidden = true; // a message belongs to the screen it was shown on
 }
 
 function escapeHtml(s) {
@@ -166,8 +266,8 @@ document.addEventListener("pointerdown", () => { if (state.settings.sound) audio
 /*  Formatting                                                         */
 /* ------------------------------------------------------------------ */
 function fmtKg(v) {
-  if (!v) return "BW";
-  return String(Math.round(v * 100) / 100);
+  if (!v) return t("bwShort");
+  return String(Math.round(v * 100) / 100).replace(".", lang() === "fr" ? "," : ".");
 }
 function fmtRest(s) {
   s = Math.max(0, Math.round(s));
@@ -193,8 +293,8 @@ function fmtField(f, v) {
   return String(v);
 }
 function specLine(it) {
-  const w = it.kg ? "<b>" + fmtKg(it.kg) + " kg</b>" : "<b>Bodyweight</b>";
-  return w + " × " + it.reps + " · " + it.sets + " sets · " + fmtRest(it.rest) + " rest";
+  const w = it.kg ? "<b>" + fmtKg(it.kg) + " kg</b>" : "<b>" + t("bw") + "</b>";
+  return w + " × " + it.reps + " · " + it.sets + " " + t("sets") + " · " + fmtRest(it.rest) + " " + t("restWord");
 }
 const key = (name) => String(name).trim().toLowerCase();
 
@@ -237,29 +337,28 @@ function renderHome() {
 function renderIdle() {
   const last = state.workouts[state.workouts.length - 1];
   $("#idle-sub").textContent = last
-    ? "Last workout " + new Date(last.start).toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" }) +
-      (last.name ? " · " + last.name : "")
-    : "Tap start, pick an exercise, spin the wheel.";
+    ? t("idleLast", new Date(last.start).toLocaleDateString(t("locale"), { weekday: "long", day: "numeric", month: "short" }), last.name)
+    : t("idleNone");
 
   const list = $("#tpl-list");
   list.innerHTML = "";
   $("#tpl-wrap").hidden = !state.templates.length;
-  state.templates.forEach((t) => {
+  state.templates.forEach((tp) => {
     const el = document.createElement("div");
     el.className = "tpl";
     el.innerHTML =
-      '<div class="tpl-main"><div class="tpl-name">' + escapeHtml(t.name) + "</div>" +
-      '<div class="tpl-sub">' + escapeHtml(t.items.map((i) => i.name).join(" · ")) + "</div></div>" +
-      '<span class="tpl-go">Start</span>' +
-      '<button class="mini-btn" type="button" aria-label="Delete training">✕</button>';
-    el.querySelector(".tpl-main").onclick = () => startWorkout(t.items, t.name);
-    el.querySelector(".tpl-go").onclick = () => startWorkout(t.items, t.name);
+      '<div class="tpl-main"><div class="tpl-name">' + escapeHtml(tp.name) + "</div>" +
+      '<div class="tpl-sub">' + escapeHtml(tp.items.map((i) => i.name).join(" · ")) + "</div></div>" +
+      '<span class="tpl-go">' + t("go") + "</span>" +
+      '<button class="mini-btn" type="button" aria-label="' + t("delTpl") + '">' + ic("x") + "</button>";
+    el.querySelector(".tpl-main").onclick = () => startWorkout(tp.items, tp.name);
+    el.querySelector(".tpl-go").onclick = () => startWorkout(tp.items, tp.name);
     el.querySelector(".mini-btn").onclick = (e) => {
       e.stopPropagation();
       const snap = snapshot();
-      state.templates = state.templates.filter((x) => x.id !== t.id);
+      state.templates = state.templates.filter((x) => x.id !== tp.id);
       save(); renderIdle();
-      toast("Deleted “" + t.name + "”", false, { label: "Undo", fn: () => restore(snap) });
+      toast(t("deleted", tp.name), false, { label: t("undo"), fn: () => restore(snap) });
     };
     list.appendChild(el);
   });
@@ -295,21 +394,21 @@ function renderWorkout() {
     el.className = "ex" + (complete ? " complete" : "") + (it === next ? " next" : "");
     const n = Math.max(it.sets, it.done.length);
     let dots = "";
-    for (let i = 0; i < n; i++) dots += '<button class="dot' + (i < it.done.length ? " on" : "") + '" data-i="' + i + '" type="button">' + (i < it.done.length ? "✓" : "") + "</button>";
+    for (let i = 0; i < n; i++) dots += '<button class="dot' + (i < it.done.length ? " on" : "") + '" data-i="' + i + '" type="button">' + (i < it.done.length ? ic("check") : "") + "</button>";
     el.innerHTML =
       '<div class="ex-main"><div class="ex-name">' + escapeHtml(it.name) +
-      '<span class="part-tag">' + escapeHtml(it.part || "") + "</span></div>" +
+      '<span class="part-tag">' + escapeHtml(partName(it.part)) + "</span></div>" +
       '<div class="ex-spec">' + specLine(it) + "</div>" +
       '<div class="dots">' + dots + "</div></div>" +
-      '<button class="tick' + (complete ? " all" : "") + '" type="button" aria-label="Set done">' +
-      (complete ? "✓" : it.done.length + 1 + "") + "</button>";
+      '<button class="tick' + (complete ? " all" : "") + '" type="button" aria-label="' + t("setDone") + '">' +
+      (complete ? ic("check", "lg") : it.done.length + 1 + "") + "</button>";
     el.querySelector(".ex-main").onclick = (e) => {
       const dot = e.target.closest(".dot");
       if (dot) setDone(it, +dot.dataset.i < it.done.length ? +dot.dataset.i : +dot.dataset.i + 1);
       else openWheel({ mode: "edit", item: it });
     };
     el.querySelector(".tick").onclick = () => {
-      if (complete) { toast(it.name + " is done"); return; }
+      if (complete) { toast(t("exDone", it.name)); return; }
       setDone(it, it.done.length + 1);
     };
     list.appendChild(el);
@@ -326,8 +425,8 @@ function setDone(it, count) {
     for (let i = before; i < count; i++) it.done.push({ kg: it.kg, reps: it.reps, at: Date.now() });
     haptic();
     const after = nextItem();
-    if (after) startRest(it.rest, after === it ? "Next: set " + (it.done.length + 1) + " of " + it.sets : "Next: " + after.name);
-    else { state.active.rest = null; toast("All sets done 💪 — tap Finish"); }
+    if (after) startRest(it.rest, after === it ? { set: it.done.length + 1, of: it.sets } : { name: after.name });
+    else { state.active.rest = null; toast(t("allDone")); }
   } else {
     it.done.length = count;
     haptic();
@@ -339,9 +438,10 @@ function setDone(it, count) {
 /* ------------------------------------------------------------------ */
 /*  Rest timer                                                         */
 /* ------------------------------------------------------------------ */
-function startRest(secs, label) {
+// next: what comes after the rest, kept as facts so the label follows the language
+function startRest(secs, next) {
   if (!secs) { state.active.rest = null; return; }
-  state.active.rest = { end: Date.now() + secs * 1000, total: secs, label, rang: false };
+  state.active.rest = { end: Date.now() + secs * 1000, total: secs, next, rang: false };
 }
 
 const REST_C = 2 * Math.PI * 19;
@@ -355,8 +455,10 @@ function renderRest() {
   const left = (r.end - Date.now()) / 1000;
   const over = left <= 0;
   bar.classList.toggle("over", over);
-  $("#rest-time").textContent = over ? "Go!" : fmtRest(Math.ceil(left));
-  $("#rest-label").textContent = over ? r.label + " · +" + fmtRest(-left) : r.label;
+  $("#rest-time").textContent = over ? t("restGo") : fmtRest(Math.ceil(left));
+  const n = r.next || {};
+  const label = n.name ? t("nextEx", n.name) : n.set ? t("nextSet", n.set, n.of) : t("rest");
+  $("#rest-label").textContent = over ? label + " · +" + fmtRest(-left) : label;
   const arc = $("#rest-arc");
   arc.style.strokeDasharray = REST_C;
   arc.style.strokeDashoffset = over ? 0 : REST_C * (1 - left / r.total);
@@ -389,7 +491,7 @@ function tickClock() {
     el.textContent = fmtClock(Date.now() - state.active.start);
     el.classList.add("live");
   } else {
-    el.textContent = "Gym";
+    el.textContent = t("gym");
     el.classList.remove("live");
   }
 }
@@ -440,7 +542,7 @@ function renderParts() {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "chip" + (p === pickPart ? " selected" : "");
-    b.textContent = p || "All";
+    b.textContent = p ? t(p) : t("all");
     b.onclick = () => { pickPart = p; haptic(); renderParts(); renderSuggest(); };
     wrap.appendChild(b);
   });
@@ -448,7 +550,7 @@ function renderParts() {
 
 function partOf(name) {
   const k = key(name);
-  return PARTS.find((p) => STARTERS[p].some((s) => key(s) === k)) || "";
+  return PARTS.find((p) => ["en", "fr"].some((l) => STARTERS[l][p].some((s) => key(s) === k))) || "";
 }
 
 function renderSuggest() {
@@ -464,7 +566,7 @@ function renderSuggest() {
   const known = new Set(Array.from(lib.keys()));
   const ideas = [];
   (pickPart && !q ? [pickPart] : PARTS).forEach((p) =>
-    STARTERS[p].forEach((n) => {
+    STARTERS[lang()][p].forEach((n) => {
       if (!known.has(key(n)) && !inWorkout.has(key(n)) && match(n, p)) ideas.push({ name: n, part: p });
     })
   );
@@ -486,14 +588,14 @@ function renderSuggest() {
     list.appendChild(b);
   };
 
-  if (recent.length) head("Yours");
+  if (recent.length) head(t("yours"));
   recent.slice(0, 12).forEach((e) =>
     row(e.name, escapeHtml(fmtKg(e.kg) + (e.kg ? " kg" : "") + " · " + e.sets + "×" + e.reps), "recent", () =>
       openWheel({ mode: "known", name: e.name, part: e.part, vals: e, last: e })
     )
   );
-  if (ideas.length) head(recent.length ? "Ideas" : "Pick one");
-  ideas.forEach((e) => row(e.name, escapeHtml(e.part), "", () => openWheel({ mode: "new", name: e.name, part: e.part })));
+  if (ideas.length) head(recent.length ? t("ideas") : t("pickOne"));
+  ideas.forEach((e) => row(e.name, escapeHtml(t(e.part)), "", () => openWheel({ mode: "new", name: e.name, part: e.part })));
 }
 
 function pickTyped() {
@@ -535,7 +637,6 @@ function openWheel(opts) {
   };
   $("#wheel-name").textContent = W.name;
   $("#wheel-del").hidden = W.mode !== "edit";
-  $("#wheel-spacer").hidden = W.mode === "edit";
   closeInput(false);
   showScreen("screen-wheel");
   buildTicks();
@@ -547,7 +648,7 @@ function renderWheel() {
   const cfg = FIELDS[f];
   const v = W.vals[f];
 
-  $("#wheel-part").textContent = W.part || "+ part";
+  $("#wheel-part").textContent = W.part ? t(W.part) : t("addPart");
 
   $$(".fcell").forEach((c) => {
     const k = c.dataset.f;
@@ -573,20 +674,20 @@ function renderWheel() {
   lastDot.style.display = lastV != null && (f === "kg" || f === "reps") ? "" : "none";
   if (lastV != null) placeOnRing(lastDot, (lastV / rev) % 1 || (lastV ? 1 : 0));
 
-  $("#w-value").textContent = f === "kg" && !v ? "BW" : fmtField(f, v);
-  $("#w-unit").textContent = f === "kg" && !v ? "bodyweight" : cfg.unit;
+  $("#w-value").textContent = fmtField(f, v);
+  $("#w-unit").textContent = f === "kg" && !v ? t("bw").toLowerCase() : f === "kg" ? "kg" : t(cfg.unit === "rest" ? "restWord" : cfg.unit);
 
   // the note under the number: how this compares to last time
   let note = "";
   let beat = false;
   if (f === "kg" && W.last) {
-    if (W.last.best && v > W.last.best) { note = "New best!"; beat = true; }
-    else if (v > W.last.kg) { note = "+" + fmtKg(v - W.last.kg) + " kg vs last"; beat = true; }
-    else if (v === W.last.kg) note = "Same as last time";
-    else note = "Last: " + fmtKg(W.last.kg) + " kg";
+    if (W.last.best && v > W.last.best) { note = t("best"); beat = true; }
+    else if (v > W.last.kg) { note = t("plusKg", fmtKg(v - W.last.kg)); beat = true; }
+    else if (v === W.last.kg) note = t("same");
+    else note = W.last.kg ? t("lastKg", fmtKg(W.last.kg)) : t("lastReps", fmtKg(0));
   } else if (f === "reps" && W.last) {
-    if (v > W.last.reps) { note = "+" + (v - W.last.reps) + " vs last"; beat = true; }
-    else note = v === W.last.reps ? "Same as last time" : "Last: " + W.last.reps;
+    if (v > W.last.reps) { note = t("plusReps", v - W.last.reps); beat = true; }
+    else note = v === W.last.reps ? t("same") : t("lastReps", W.last.reps);
   }
   $("#w-note").textContent = note;
   $("#wheel").classList.toggle("beat", beat);
@@ -594,9 +695,9 @@ function renderWheel() {
   renderPresets();
 
   const go = $("#wheel-go");
-  if (W.mode === "edit") go.textContent = "Save";
-  else if (W.mode === "new" && ORDER.indexOf(f) < ORDER.length - 1) go.textContent = "Next";
-  else go.textContent = state.active ? "Add to workout" : "Start with this";
+  if (W.mode === "edit") go.textContent = t("save");
+  else if (W.mode === "new" && ORDER.indexOf(f) < ORDER.length - 1) go.textContent = t("next");
+  else go.textContent = state.active ? t("addTo") : t("startWith");
 }
 
 function placeOnRing(el, frac) {
@@ -636,10 +737,10 @@ function renderPresets() {
   };
   if (f === "kg") {
     chip("−5", Math.max(0, v - 5), "nudge");
-    chip("−2.5", Math.max(0, v - 2.5), "nudge");
-    if (W.last && W.last.kg !== v) chip("Last " + fmtKg(W.last.kg), W.last.kg, "");
-    else chip("BW", 0, "");
-    chip("+2.5", v + 2.5, "nudge");
+    chip("−" + fmtKg(2.5), Math.max(0, v - 2.5), "nudge");
+    if (W.last && W.last.kg !== v) chip(t("lastChip", fmtKg(W.last.kg)), W.last.kg, "");
+    else chip(t("bwShort"), 0, "");
+    chip("+" + fmtKg(2.5), v + 2.5, "nudge");
     chip("+5", v + 5, "nudge");
   } else {
     PRESETS[f].forEach((p) => chip(fmtField(f, p), p, "", true));
@@ -698,7 +799,7 @@ $("#wheel-del").onclick = () => {
   save();
   showScreen("screen-home");
   renderHome();
-  toast("Removed " + W.name, false, { label: "Undo", fn: () => restore(snap) });
+  toast(t("removed", W.name), false, { label: t("undo"), fn: () => restore(snap) });
 };
 
 function commitWheel() {
@@ -716,7 +817,7 @@ function commitWheel() {
   save();
   showScreen("screen-home");
   renderHome();
-  toast("Added " + W.name);
+  toast(t("added", W.name));
 }
 
 /* turning: the angle your finger moves around the centre becomes steps */
@@ -834,7 +935,7 @@ $("#finish").onclick = () => {
   if (!st.sets) {
     state.active = null;
     save(); renderHome();
-    toast("Nothing ticked — workout discarded", false, { label: "Undo", fn: () => restore(snap) });
+    toast(t("discarded"), false, { label: t("undo"), fn: () => restore(snap) });
     return;
   }
   a.end = Date.now();
@@ -845,9 +946,9 @@ $("#finish").onclick = () => {
   lastFinished = a;
   keepAwake();
   $("#done-stats").innerHTML =
-    '<div class="stat"><b>' + fmtMins(st.ms) + "</b><span>time</span></div>" +
-    '<div class="stat"><b>' + st.sets + "</b><span>sets</span></div>" +
-    '<div class="stat"><b>' + fmtVolume(st.volume) + "</b><span>lifted</span></div>";
+    '<div class="stat"><b>' + fmtMins(st.ms) + "</b><span>" + t("sTime") + "</span></div>" +
+    '<div class="stat"><b>' + st.sets + "</b><span>" + t("sSets") + "</span></div>" +
+    '<div class="stat"><b>' + fmtVolume(st.volume) + "</b><span>" + t("sLifted") + "</span></div>";
   $("#done-tpl").hidden = state.templates.some((t) => a.name && t.name === a.name);
   showScreen("screen-done");
 };
@@ -859,7 +960,7 @@ $("#save-tpl").onclick = () => askName(state.active);
 function guessName(w) {
   const parts = [];
   w.items.forEach((it) => { if (it.part && parts.indexOf(it.part) < 0) parts.push(it.part); });
-  return parts.slice(0, 3).join(" + ");
+  return parts.slice(0, 3).map(partName).join(" + ");
 }
 
 // "Save as training": a name sheet, then the exercises are stored (values included).
@@ -879,7 +980,7 @@ function askName(w, after) {
     w.name = name;
     save();
     closeSheet();
-    toast((existing ? "Updated “" : "Saved “") + name + "”");
+    toast(t(existing ? "tplUpdated" : "tplSaved", name));
     if (after) after();
   };
   setTimeout(() => { inp.focus(); inp.select(); }, 50);
@@ -897,13 +998,13 @@ function renderHistory() {
   const wrap = $("#hist-list");
   wrap.innerHTML = "";
   if (!state.workouts.length) {
-    wrap.innerHTML = '<div class="empty">No workouts yet.<br />Finish one and it shows up here.</div>';
+    wrap.innerHTML = '<div class="empty">' + t("noWorkouts") + "</div>";
     return;
   }
   let month = "";
   state.workouts.slice().reverse().forEach((w) => {
     const d = new Date(w.start);
-    const m = d.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+    const m = d.toLocaleDateString(t("locale"), { month: "long", year: "numeric" });
     if (m !== month) {
       month = m;
       const h = document.createElement("div");
@@ -923,14 +1024,14 @@ function renderHistory() {
     }).join("");
     el.innerHTML =
       '<div class="hw-top"><span class="hw-date">' +
-      escapeHtml(d.toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" }) + (w.name ? " · " + w.name : "")) +
-      '</span><span class="hw-meta">' + fmtMins(st.ms) + " · " + st.sets + " sets · " + fmtVolume(st.volume) + "</span></div>" +
+      escapeHtml(d.toLocaleDateString(t("locale"), { weekday: "short", day: "numeric", month: "short" }) + (w.name ? " · " + w.name : "")) +
+      '</span><span class="hw-meta">' + fmtMins(st.ms) + " · " + st.sets + " " + t("sets") + " · " + fmtVolume(st.volume) + "</span></div>" +
       lines +
-      '<div class="hw-acts"><button class="pill rep" type="button">↻ Do again</button>' +
-      '<button class="pill tpl-b" type="button">☆ Save as training</button>' +
-      '<button class="pill del" type="button" aria-label="Delete">✕</button></div>';
+      '<div class="hw-acts"><button class="pill rep" type="button">' + ic("again") + "<span>" + t("again") + "</span></button>" +
+      '<button class="pill tpl-b" type="button">' + ic("star") + "<span>" + t("tplShort") + "</span></button>" +
+      '<button class="pill del" type="button" aria-label="' + t("del") + '">' + ic("trash") + "</button></div>";
     el.querySelector(".rep").onclick = () => {
-      if (state.active) { toast("Finish the current workout first", true); return; }
+      if (state.active) { toast(t("finishFirst"), true); return; }
       startWorkout(w.items, w.name);
       showScreen("screen-home");
     };
@@ -939,7 +1040,7 @@ function renderHistory() {
       const snap = snapshot();
       state.workouts = state.workouts.filter((x) => x !== w);
       save(); renderHistory();
-      toast("Workout deleted", false, { label: "Undo", fn: () => { restore(snap); renderHistory(); } });
+      toast(t("wDeleted"), false, { label: t("undo"), fn: () => { restore(snap); renderHistory(); } });
     };
     wrap.appendChild(el);
   });
@@ -972,23 +1073,26 @@ $("#import-file").onchange = async (e) => {
   try {
     const v = JSON.parse(await file.text());
     if (!v || !Array.isArray(v.workouts) || !Array.isArray(v.templates)) throw new Error("bad");
-    if (!confirm("Replace what's on this phone with this backup (" + v.workouts.length + " workouts)?")) return;
+    if (!confirm(t("replace", v.workouts.length))) return;
     const snap = snapshot();
     const b = blank();
     state = { ...b, ...v, settings: { ...b.settings, ...(v.settings || {}) } };
     save();
-    toast("Backup imported", false, { label: "Undo", fn: () => restore(snap) });
+    applyLang();
+    toast(t("imported"), false, { label: t("undo"), fn: () => restore(snap) });
   } catch (err) {
-    toast("That isn't a Gym Log backup", true);
+    toast(t("badBackup"), true);
   }
 };
 $("#wipe").onclick = () => {
-  if (!confirm("Erase every workout and training on this phone?")) return;
+  if (!confirm(t("wipeQ"))) return;
   const snap = snapshot();
+  const keep = state.settings;
   state = blank();
+  state.settings = keep;
   save();
   renderSettings();
-  toast("Erased", false, { label: "Undo", fn: () => restore(snap) });
+  toast(t("erased"), false, { label: t("undo"), fn: () => restore(snap) });
 };
 
 /* ------------------------------------------------------------------ */
@@ -1008,9 +1112,37 @@ $("#toast-act").onclick = () => {
 };
 
 /* ------------------------------------------------------------------ */
+/*  Language switch: the flag shows the language you're in             */
+/* ------------------------------------------------------------------ */
+function applyLang() {
+  document.documentElement.lang = lang();
+  $$("[data-i18n]").forEach((el) => (el.textContent = t(el.dataset.i18n)));
+  $$("[data-i18n-ph]").forEach((el) => (el.placeholder = t(el.dataset.i18nPh)));
+  $$("[data-i18n-aria]").forEach((el) => el.setAttribute("aria-label", t(el.dataset.i18nAria)));
+  $("#lang-use").setAttribute("href", "#flag-" + lang());
+  $("#lang").setAttribute("aria-label", t("langSwitch"));
+  // whatever is on screen re-renders in the new language
+  renderHome();
+  if ($("#screen-pick").classList.contains("active")) { renderParts(); renderSuggest(); }
+  if ($("#screen-wheel").classList.contains("active") && W) renderWheel();
+  if ($("#screen-history").classList.contains("active")) renderHistory();
+}
+
+$("#lang").onclick = () => {
+  state.settings.lang = lang() === "fr" ? "en" : "fr";
+  save();
+  haptic();
+  applyLang();
+  const b = $("#lang");
+  b.classList.remove("flip");
+  void b.offsetWidth; // restart the flip animation
+  b.classList.add("flip");
+};
+
+/* ------------------------------------------------------------------ */
 /*  Boot                                                               */
 /* ------------------------------------------------------------------ */
-renderHome();
+applyLang();
 // ask the browser not to clear our data when space runs low
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 if ("serviceWorker" in navigator) {
