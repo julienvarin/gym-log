@@ -259,8 +259,26 @@ function beep() {
   if (navigator.vibrate) { try { navigator.vibrate([120, 80, 120]); } catch (e) {} }
 }
 
-// Audio can only start from a touch, so wake it on the first one.
-document.addEventListener("pointerdown", () => { if (state.settings.sound) audio(); }, { once: true, capture: true });
+// iOS only lets audio start inside a finished tap (touchend / click), not on
+// touch-down or while dragging. So on each tap, until the audio is running, wake
+// it and play one silent sample; after that the wheel can click while you turn it.
+function unlockAudio() {
+  if (!state.settings.sound) return;
+  const a = audio();
+  if (!a) return;
+  try {
+    const src = a.createBufferSource();
+    src.buffer = a.createBuffer(1, 1, 22050);
+    src.connect(a.destination);
+    src.start(0);
+  } catch (e) {}
+  if (a.state === "running") {
+    document.removeEventListener("touchend", unlockAudio, true);
+    document.removeEventListener("click", unlockAudio, true);
+  }
+}
+document.addEventListener("touchend", unlockAudio, true);
+document.addEventListener("click", unlockAudio, true);
 
 /* ------------------------------------------------------------------ */
 /*  Formatting                                                         */
