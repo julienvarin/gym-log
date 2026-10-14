@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <title>Gym Log</title>
+  <meta name="description" content="Log gym sets in as few taps as possible." />
+
+  <!-- PWA / iOS home-screen -->
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0b0b0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Gym" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Home: start a workout, or the workout in progress -->
+  <section id="screen-home" class="screen active">
+    <header class="topbar">
+      <button id="go-history" class="icon-btn" aria-label="History"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 20V12M12 20V5M19 20v-9"/></svg></button>
+      <span id="clock" class="progress">Gym</span>
+      <button id="go-settings" class="icon-btn" aria-label="Settings">⚙</button>
+    </header>
+
+    <!-- no workout running -->
+    <div id="home-idle" class="scroll">
+      <div class="hero">
+        <div class="brand"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg></div>
+        <h1 class="title">Ready?</h1>
+        <p id="idle-sub" class="hint center"></p>
+      </div>
+      <button id="start-empty" class="btn primary wide">Start workout</button>
+      <div id="tpl-wrap">
+        <div class="section-label">Trainings</div>
+        <div id="tpl-list" class="card-list"></div>
+      </div>
+    </div>
+
+    <!-- workout running -->
+    <div id="home-active" class="scroll" hidden>
+      <div id="ex-list" class="card-list"></div>
+      <button id="add-ex" class="add-ex" type="button"><span>+</span> Add exercise</button>
+      <div class="row finish-row">
+        <button id="save-tpl" class="btn ghost small grow" type="button">☆ Save as training</button>
+        <button id="finish" class="btn small grow finish-btn" type="button">Finish workout</button>
+      </div>
+    </div>
+
+    <!-- rest countdown, floats above the list -->
+    <div id="rest" class="rest" hidden>
+      <svg class="rest-ring" viewBox="0 0 44 44"><circle cx="22" cy="22" r="19" class="rr-track"/><circle id="rest-arc" cx="22" cy="22" r="19" class="rr-arc"/></svg>
+      <div class="rest-main">
+        <div id="rest-time" class="rest-time">1:30</div>
+        <div id="rest-label" class="rest-label">Rest</div>
+      </div>
+      <button id="rest-minus" class="rest-btn" type="button">−15</button>
+      <button id="rest-plus" class="rest-btn" type="button">+15</button>
+      <button id="rest-skip" class="rest-btn skip" type="button">Skip</button>
+    </div>
+  </section>
+
+  <!-- Pick an exercise: body part + name -->
+  <section id="screen-pick" class="screen">
+    <header class="topbar">
+      <button id="pick-back" class="icon-btn" aria-label="Back">‹</button>
+      <span class="progress">Add exercise</span>
+      <span class="icon-btn" aria-hidden="true"></span>
+    </header>
+    <div class="scroll pick">
+      <div id="parts" class="chips scroll-x"></div>
+      <div class="name-row">
+        <input id="ex-name" class="field" type="text" enterkeyhint="next" autocomplete="off" autocapitalize="sentences" placeholder="Exercise name" />
+        <button id="name-next" class="btn primary" type="button" hidden>Next</button>
+      </div>
+      <div id="suggest" class="suggest-list"></div>
+    </div>
+  </section>
+
+  <!-- The wheel: weight, reps, sets, rest on one screen -->
+  <section id="screen-wheel" class="screen">
+    <header class="topbar">
+      <button id="wheel-back" class="icon-btn" aria-label="Back">‹</button>
+      <span class="wheel-title"><span id="wheel-name"></span><span id="wheel-part" class="part-tag"></span></span>
+      <button id="wheel-del" class="icon-btn del" aria-label="Remove exercise" hidden>🗑</button>
+      <span id="wheel-spacer" class="icon-btn" aria-hidden="true"></span>
+    </header>
+
+    <div class="wheel-body">
+      <div id="fields" class="fields">
+        <button class="fcell" data-f="kg"><span class="fl">Weight</span><b data-v="kg"></b></button>
+        <button class="fcell" data-f="reps"><span class="fl">Reps</span><b data-v="reps"></b></button>
+        <button class="fcell" data-f="sets"><span class="fl">Sets</span><b data-v="sets"></b></button>
+        <button class="fcell" data-f="rest"><span class="fl">Rest</span><b data-v="rest"></b></button>
+      </div>
+
+      <div id="wheel" class="wheel">
+        <div class="dial">
+        <svg viewBox="0 0 300 300" aria-hidden="true">
+          <defs>
+            <linearGradient id="wg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#7c6cf6"/><stop offset="1" stop-color="#8b5cf6"/>
+            </linearGradient>
+          </defs>
+          <circle cx="150" cy="150" r="128" class="w-track"/>
+          <circle id="w-lap" cx="150" cy="150" r="128" class="w-lap"/>
+          <circle id="w-arc" cx="150" cy="150" r="128" class="w-arc"/>
+          <g id="w-ticks"></g>
+          <circle id="w-last" cx="150" cy="22" r="5" class="w-last"/>
+          <circle id="w-thumb" cx="150" cy="22" r="15" class="w-thumb"/>
+        </svg>
+        <button id="w-center" class="w-center" type="button" aria-label="Type a value">
+          <span id="w-value" class="w-value">0</span>
+          <span id="w-unit" class="w-unit">kg</span>
+          <span id="w-note" class="w-note"></span>
+        </button>
+        <input id="w-input" class="w-input" type="text" inputmode="decimal" enterkeyhint="done" hidden />
+        </div>
+      </div>
+
+      <div id="presets" class="chips presets"></div>
+      <button id="wheel-go" class="btn primary wide">Next</button>
+    </div>
+  </section>
+
+  <!-- Workout finished -->
+  <section id="screen-done" class="screen pad">
+    <div class="stack center">
+      <div class="check">✓</div>
+      <div class="saved-amount">Workout saved</div>
+      <div id="done-stats" class="done-stats"></div>
+      <button id="done-tpl" class="btn wide" type="button">☆ Save as training</button>
+      <button id="done-ok" class="btn primary wide" type="button">Done</button>
+    </div>
+  </section>
+
+  <!-- History -->
+  <section id="screen-history" class="screen">
+    <header class="topbar">
+      <button id="hist-back" class="icon-btn" aria-label="Back">‹</button>
+      <span class="progress">History</span>
+      <span class="icon-btn" aria-hidden="true"></span>
+    </header>
+    <div id="hist-list" class="scroll"></div>
+  </section>
+
+  <!-- Settings -->
+  <section id="screen-settings" class="screen">
+    <header class="topbar">
+      <button id="set-back" class="icon-btn" aria-label="Back">‹</button>
+      <span class="progress">Settings</span>
+      <span class="icon-btn" aria-hidden="true"></span>
+    </header>
+    <div class="scroll">
+      <div class="section-label">Feel</div>
+      <button id="opt-sound" class="opt" type="button"><span>Click sound on the wheel<small>Plays alongside the haptic tick. Doesn't stop your music.</small></span><i class="tog"></i></button>
+      <button id="opt-awake" class="opt" type="button"><span>Keep screen on during a workout<small>So the rest timer stays in view.</small></span><i class="tog"></i></button>
+
+      <div class="section-label">Your data</div>
+      <p class="hint small-hint">Everything is stored on this phone only. Export a backup now and then, and import it on a new phone.</p>
+      <div class="row">
+        <button id="export" class="btn grow" type="button">Export backup</button>
+        <button id="import" class="btn grow" type="button">Import</button>
+      </div>
+      <input id="import-file" type="file" accept="application/json,.json" hidden />
+      <button id="wipe" class="btn ghost small wide danger-txt" type="button">Erase all data</button>
+    </div>
+  </section>
+
+  <!-- Name prompt (save as training) -->
+  <div id="sheet" class="sheet" hidden>
+    <div class="sheet-card">
+      <div class="section-label">Name this training</div>
+      <input id="sheet-input" class="field" type="text" enterkeyhint="done" autocomplete="off" autocapitalize="words" placeholder="e.g. Push day" />
+      <div class="row">
+        <button id="sheet-cancel" class="btn ghost grow" type="button">Cancel</button>
+        <button id="sheet-ok" class="btn primary grow" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" hidden><span id="toast-msg"></span><button id="toast-act" class="toast-act" type="button" hidden></button></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
