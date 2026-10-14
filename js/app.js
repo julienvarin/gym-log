@@ -9,22 +9,22 @@ const PARTS = ["Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Cardio"];
 // Body parts are stored by their English key and only translated on screen.
 const STARTERS = {
   en: {
-    Chest: ["Bench press", "Incline dumbbell press", "Chest fly", "Push-ups", "Dips"],
-    Back: ["Deadlift", "Pull-ups", "Barbell row", "Lat pulldown", "Seated cable row"],
-    Legs: ["Squat", "Leg press", "Romanian deadlift", "Lunges", "Leg curl", "Leg extension", "Calf raise"],
-    Shoulders: ["Overhead press", "Lateral raise", "Rear delt fly", "Face pull"],
-    Arms: ["Biceps curl", "Hammer curl", "Triceps pushdown", "Skull crusher"],
-    Core: ["Plank", "Hanging leg raise", "Cable crunch", "Russian twist"],
-    Cardio: ["Rowing", "Bike", "Treadmill", "Jump rope"],
+    Chest: ["Bench press", "Incline dumbbell press", "Chest fly", "Push-ups", "Dips", "Chest press machine", "Pec deck", "Cable crossover"],
+    Back: ["Deadlift", "Pull-ups", "Barbell row", "Lat pulldown", "Seated cable row", "Assisted pull-up", "T-bar row", "Back extension", "TRX row"],
+    Legs: ["Squat", "Leg press", "Romanian deadlift", "Lunges", "Leg curl", "Leg extension", "Calf raise", "Hack squat", "Smith machine squat", "Hip thrust", "Abductor machine", "Adductor machine", "Cable glute kickback"],
+    Shoulders: ["Overhead press", "Lateral raise", "Rear delt fly", "Face pull", "Shoulder press machine", "Cable lateral raise", "Shrugs"],
+    Arms: ["Biceps curl", "Hammer curl", "Triceps pushdown", "Skull crusher", "Preacher curl", "Cable curl", "Overhead triceps extension", "Dip machine"],
+    Core: ["Plank", "Hanging leg raise", "Cable crunch", "Russian twist", "Ab crunch machine", "Cable woodchop", "Ab wheel"],
+    Cardio: ["Rowing", "Bike", "Treadmill", "Jump rope", "Cross trainer", "Stair climber"],
   },
   fr: {
-    Chest: ["Développé couché", "Développé incliné haltères", "Écarté", "Pompes", "Dips"],
-    Back: ["Soulevé de terre", "Tractions", "Rowing barre", "Tirage vertical", "Tirage horizontal"],
-    Legs: ["Squat", "Presse à cuisses", "Soulevé de terre jambes tendues", "Fentes", "Leg curl", "Leg extension", "Mollets"],
-    Shoulders: ["Développé militaire", "Élévations latérales", "Oiseau", "Face pull"],
-    Arms: ["Curl biceps", "Curl marteau", "Extension triceps poulie", "Barre au front"],
-    Core: ["Gainage", "Relevé de jambes suspendu", "Crunch à la poulie", "Russian twist"],
-    Cardio: ["Rameur", "Vélo", "Tapis de course", "Corde à sauter"],
+    Chest: ["Développé couché", "Développé incliné haltères", "Écarté", "Pompes", "Dips", "Presse pectoraux machine", "Pec deck", "Écarté poulie vis-à-vis"],
+    Back: ["Soulevé de terre", "Tractions", "Rowing barre", "Tirage vertical", "Tirage horizontal", "Tractions assistées", "Rowing T-bar", "Extension lombaire", "Rowing TRX"],
+    Legs: ["Squat", "Presse à cuisses", "Soulevé de terre jambes tendues", "Fentes", "Leg curl", "Leg extension", "Mollets", "Hack squat", "Squat à la Smith machine", "Hip thrust", "Machine abducteurs", "Machine adducteurs", "Kickback fessiers à la poulie"],
+    Shoulders: ["Développé militaire", "Élévations latérales", "Oiseau", "Face pull", "Presse épaules machine", "Élévations latérales à la poulie", "Shrugs"],
+    Arms: ["Curl biceps", "Curl marteau", "Extension triceps poulie", "Barre au front", "Curl pupitre", "Curl à la poulie", "Extension triceps au-dessus de la tête", "Dips à la machine"],
+    Core: ["Gainage", "Relevé de jambes suspendu", "Crunch à la poulie", "Russian twist", "Machine à abdos", "Bûcheron à la poulie", "Roue abdominale"],
+    Cardio: ["Rameur", "Vélo", "Tapis de course", "Corde à sauter", "Vélo elliptique", "Simulateur d'escalier"],
   },
 };
 
