@@ -3,37 +3,39 @@
 Log your gym sets in as few taps as possible — a home-screen web app (PWA) hosted on
 GitHub Pages, in the same style as [Saver](https://github.com/julienvarin/saver).
 
-**The flow:** Start workout → pick an exercise → spin the wheel → Add. Then tap the big
-round button each time you finish a set; the rest timer starts on its own.
+**Two modes.**
 
-- **The wheel.** Weight, reps, sets and rest are on one screen. Turn the ring like an iPod
-  click wheel: every tick is one step (2.5 kg, 1 rep, 1 set, 15 s), with a haptic tick and a
-  click sound. One full turn is 50 kg / 20 reps / 10 sets / 5 min. Tap the number in the
-  middle to type it instead. The chips under it are shortcuts (8 · 10 · 12 reps, 3 · 4 · 5
-  sets, 1:30 rest…) and jump straight to the next field.
-- **Last time.** An exercise you've done before comes back with last time's values, so
-  adding it is two taps. The yellow dot on the ring is last time; the ring turns green
-  when you beat it, and says *New best!* past your heaviest set.
-- **Body parts.** Filter exercises by Chest, Back, Legs… Tap the tag next to the name on
-  the wheel screen to change it.
-- **Sets.** Each exercise shows a dot per set. The round button ticks the next one; tap a
-  dot to tick up to it, or tap a ticked dot to untick. Tap the exercise to change its
-  weight / reps / sets, or remove it.
-- **Rest timer.** Starts when you tick a set, with −15 / +15 / Skip. It beeps when rest is
-  over (sounds mix with your music instead of pausing it).
-- **Trainings.** *Save as training* stores the workout's exercises. Start one from the home
-  screen — it fills in the values you used last time. From History, *Do again* repeats any
-  past workout.
-- **History.** Every finished workout with time, sets and total weight lifted.
-- **English / Français.** Tap the round flag at the top of the home screen to switch. It
-  starts in French if your phone is set to French. Exercise ideas come in both languages.
+- **Plan** — Home lists your trainings. Tap **+** for a new one, or tap a training to edit it:
+  add exercises and set each one on the wheel. Nothing is timed while you plan.
+- **Do** — Tap **▶** on a training. The screen is just the current exercise: the weight × reps,
+  one dot per set and one big **✓**. Each ✓ turns the whole screen into the rest countdown
+  (−15 / skip / +15), which beeps and hands back when it's over. After the last set it moves on
+  to the next exercise; swipe left / right to jump. A small clock in the corner shows the
+  total time; ☰ lists every exercise, adds one, or finishes. **⌄** goes back to your trainings
+  while the workout keeps running (a green bar brings you back).
+
+**Reps or time.** Weight exercises log kg × reps × sets with a rest. Timed ones (everything in
+Cardio, planks) log a duration, plus a distance and/or a machine level if you set them; in Do
+mode they're a stopwatch (▶ / ⏸, ✓ when done) with a ring that fills up to your target. The
+icon at the top of the wheel switches an exercise between the two.
+
+**The wheel.** Turn the ring like an iPod click wheel; every tick is one step (2.5 kg, 1 rep,
+1 set, 15 s, 0.5 km, 1 level). Tap the number to type it. The chips are shortcuts and jump to
+the next field. An exercise you've done before comes back with last time's values; the ring
+turns green when you beat them.
+
+**The plan learns.** When you finish, the training keeps the values you actually used, so
+next time starts from there.
+
+**English / Français.** Tap the round flag on the home screen. History (📊) shows every
+finished workout; ↻ does one again.
 
 No build step, no framework, no account — plain HTML/CSS/JS.
 
 ## Your data
 
 Everything is stored **on your phone only** (browser storage). Nothing is sent anywhere.
-Use **⚙ → Export backup** now and then, and **Import** it on a new phone. Clearing Safari's
+Use **Settings → Export** now and then, and **Import** it on a new phone. Clearing Safari's
 website data, or deleting the home-screen app, erases it.
 
 ## About haptics on iPhone
