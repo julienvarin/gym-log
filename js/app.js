@@ -15,7 +15,7 @@ const STARTERS = {
     Shoulders: ["Overhead press", "Lateral raise", "Rear delt fly", "Face pull", "Shoulder press machine", "Cable lateral raise", "Shrugs"],
     Arms: ["Biceps curl", "Hammer curl", "Triceps pushdown", "Skull crusher", "Preacher curl", "Cable curl", "Overhead triceps extension", "Dip machine"],
     Core: ["Plank", "Hanging leg raise", "Cable crunch", "Russian twist", "Ab crunch machine", "Cable woodchop", "Ab wheel"],
-    Cardio: ["Rowing", "Bike", "Treadmill", "Jump rope", "Cross trainer", "Stair climber"],
+    Cardio: ["Running", "Treadmill", "Bike", "Rowing", "Cross trainer", "Stair climber", "Jump rope"],
   },
   fr: {
     Chest: ["Développé couché", "Développé incliné haltères", "Écarté", "Pompes", "Dips", "Presse pectoraux machine", "Pec deck", "Écarté poulie vis-à-vis"],
@@ -24,97 +24,88 @@ const STARTERS = {
     Shoulders: ["Développé militaire", "Élévations latérales", "Oiseau", "Face pull", "Presse épaules machine", "Élévations latérales à la poulie", "Shrugs"],
     Arms: ["Curl biceps", "Curl marteau", "Extension triceps poulie", "Barre au front", "Curl pupitre", "Curl à la poulie", "Extension triceps au-dessus de la tête", "Dips à la machine"],
     Core: ["Gainage", "Relevé de jambes suspendu", "Crunch à la poulie", "Russian twist", "Machine à abdos", "Bûcheron à la poulie", "Roue abdominale"],
-    Cardio: ["Rameur", "Vélo", "Tapis de course", "Corde à sauter", "Vélo elliptique", "Simulateur d'escalier"],
+    Cardio: ["Course à pied", "Tapis de course", "Vélo", "Rameur", "Vélo elliptique", "Simulateur d'escalier", "Corde à sauter"],
   },
 };
 
-// Every word on screen. A function takes the values it shows.
-const NB = "\u00a0"; // French puts a non-breaking space before ? ! :
-const STR = {
-  en: {
-    locale: "en-GB", gym: "Gym", restGo: "Go!", history: "History", settings: "Settings", back: "Back", remove: "Remove exercise",
-    langSwitch: "Passer en français", type: "Type a value",
-    ready: "Ready?", start: "Start workout", trainings: "Trainings", addEx: "Add exercise",
-    saveTpl: "Save as training", tplShort: "Save training", finish: "Finish workout", skip: "Skip", rest: "Rest",
-    exName: "Exercise name", next: "Next", f_kg: "Weight", f_reps: "Reps", f_sets: "Sets", f_rest: "Rest",
-    saved: "Workout saved", done: "Done", feel: "Feel",
-    sound: "Click sound on the wheel", soundSub: "Plays alongside the haptic tick. Doesn't stop your music.",
-    awake: "Keep screen on during a workout", awakeSub: "So the rest timer stays in view.",
-    data: "Your data", dataHint: "Everything is stored on this phone only. Export a backup now and then, and import it on a new phone.",
-    export: "Export backup", import: "Import", wipe: "Erase all data",
-    nameTpl: "Name this training", nameTplPh: "e.g. Push day", cancel: "Cancel", save: "Save",
-    idleNone: "Tap start, pick an exercise, spin the wheel.",
-    idleLast: (d, n) => "Last workout " + d + (n ? " · " + n : ""),
-    go: "Start", delTpl: "Delete training", deleted: (n) => "Deleted “" + n + "”", undo: "Undo",
-    bw: "Bodyweight", bwShort: "BW", sets: "sets", restWord: "rest", reps: "reps",
-    setDone: "Set done", exDone: (n) => n + " is done",
-    nextSet: (i, n) => "Next: set " + i + "/" + n, nextEx: (n) => "Next: " + n,
-    allDone: "All sets done. Tap Finish when you're ready.",
-    all: "All", yours: "Yours", ideas: "Ideas", pickOne: "Pick one", addPart: "+ body part",
-    Chest: "Chest", Back: "Back", Legs: "Legs", Shoulders: "Shoulders", Arms: "Arms", Core: "Core", Cardio: "Cardio",
-    best: "New best!", plusKg: (d) => "+" + d + " kg vs last", plusReps: (d) => "+" + d + " vs last",
-    same: "Same as last time", lastKg: (v) => "Last: " + v + " kg", lastReps: (v) => "Last: " + v, lastChip: (v) => "Last " + v,
-    addTo: "Add to workout", startWith: "Start with this",
-    removed: (n) => "Removed " + n, added: (n) => "Added " + n,
-    discarded: "Nothing ticked, workout discarded",
-    sTime: "time", sSets: "sets", sLifted: "lifted",
-    tplSaved: (n) => "Saved “" + n + "”", tplUpdated: (n) => "Updated “" + n + "”",
-    noWorkouts: "No workouts yet.<br />Finish one and it shows up here.",
-    again: "Do again", del: "Delete", finishFirst: "Finish the current workout first", wDeleted: "Workout deleted",
-    replace: (n) => "Replace what's on this phone with this backup (" + n + " workouts)?",
-    imported: "Backup imported", badBackup: "That isn't a Gym Log backup",
-    wipeQ: "Erase every workout and training on this phone?", erased: "Erased", saveFail: "Couldn't save on this phone",
-  },
-  fr: {
-    locale: "fr-FR", gym: "Muscu", restGo: "Go" + NB + "!", history: "Historique", settings: "Réglages", back: "Retour", remove: "Retirer l'exercice",
-    langSwitch: "Switch to English", type: "Saisir une valeur",
-    ready: "Prêt" + NB + "?", start: "Commencer la séance", trainings: "Entraînements", addEx: "Ajouter un exercice",
-    saveTpl: "Enregistrer l'entraînement", tplShort: "Sauvegarder", finish: "Terminer la séance", skip: "Passer", rest: "Repos",
-    exName: "Nom de l'exercice", next: "Suivant", f_kg: "Poids", f_reps: "Rép.", f_sets: "Séries", f_rest: "Repos",
-    saved: "Séance enregistrée", done: "Terminé", feel: "Ressenti",
-    sound: "Son de clic sur la molette", soundSub: "En plus du retour haptique. Ne coupe pas ta musique.",
-    awake: "Garder l'écran allumé pendant la séance", awakeSub: "Pour garder le minuteur de repos sous les yeux.",
-    data: "Tes données", dataHint: "Tout est stocké sur ce téléphone uniquement. Exporte une sauvegarde de temps en temps, et importe-la sur un nouveau téléphone.",
-    export: "Exporter une sauvegarde", import: "Importer", wipe: "Tout effacer",
-    nameTpl: "Nommer cet entraînement", nameTplPh: "ex. Haut du corps", cancel: "Annuler", save: "Enregistrer",
-    idleNone: "Commence, choisis un exercice, tourne la molette.",
-    idleLast: (d, n) => "Dernière séance " + d + (n ? " · " + n : ""),
-    go: "Go", delTpl: "Supprimer l'entraînement", deleted: (n) => "« " + n + " » supprimé", undo: "Annuler",
-    bw: "Poids du corps", bwShort: "PDC", sets: "séries", restWord: "repos", reps: "rép.",
-    setDone: "Série faite", exDone: (n) => n + " : terminé",
-    nextSet: (i, n) => "Puis série " + i + "/" + n, nextEx: (n) => "Puis " + n,
-    allDone: "Toutes les séries sont faites. Termine la séance quand tu veux.",
-    all: "Tout", yours: "Les tiens", ideas: "Idées", pickOne: "Choisis", addPart: "+ zone",
-    Chest: "Pectoraux", Back: "Dos", Legs: "Jambes", Shoulders: "Épaules", Arms: "Bras", Core: "Abdos", Cardio: "Cardio",
-    best: "Record" + NB + "!", plusKg: (d) => "+" + d + " kg vs la dernière fois", plusReps: (d) => "+" + d + " vs la dernière fois",
-    same: "Comme la dernière fois", lastKg: (v) => "Dernière fois" + NB + ": " + v + " kg", lastReps: (v) => "Dernière fois" + NB + ": " + v,
-    lastChip: (v) => "Dernier " + v,
-    addTo: "Ajouter à la séance", startWith: "Commencer avec",
-    removed: (n) => n + " retiré", added: (n) => n + " ajouté",
-    discarded: "Rien de coché, séance annulée",
-    sTime: "durée", sSets: "séries", sLifted: "soulevés",
-    tplSaved: (n) => "« " + n + " » enregistré", tplUpdated: (n) => "« " + n + " » mis à jour",
-    noWorkouts: "Aucune séance pour l'instant.<br />Termine-en une et elle apparaîtra ici.",
-    again: "Refaire", del: "Supprimer", finishFirst: "Termine d'abord la séance en cours", wDeleted: "Séance supprimée",
-    replace: (n) => "Remplacer les données de ce téléphone par cette sauvegarde (" + n + " séances)" + NB + "?",
-    imported: "Sauvegarde importée", badBackup: "Ce n'est pas une sauvegarde Gym Log",
-    wipeQ: "Effacer toutes les séances et entraînements de ce téléphone" + NB + "?", erased: "Effacé", saveFail: "Impossible d'enregistrer sur ce téléphone",
-  },
-};
-const DEFAULTS = { kg: 20, reps: 10, sets: 3, rest: 90 };
+// Exercises measured in time, not reps: everything in Cardio, plus these.
+const TIMED = new Set(["plank", "gainage"]);
+
+// Two kinds of exercise. "reps": weight × reps × sets with rest between.
+// "time": a duration, plus a distance and/or a machine level if you want them.
+const DEFAULTS = { kg: 20, reps: 10, sets: 3, rest: 90, time: 600, km: 0, level: 0 };
 
 // The wheel: `per` steps make one full turn, so every step is 360/per degrees.
 const FIELDS = {
-  kg: { unit: "kg", step: 2.5, per: 20, min: 0, max: 500 },     // 50 kg per turn
-  reps: { unit: "reps", step: 1, per: 20, min: 1, max: 100 },   // 20 reps per turn
-  sets: { unit: "sets", step: 1, per: 10, min: 1, max: 20 },    // 10 sets per turn
-  rest: { unit: "rest", step: 15, per: 20, min: 0, max: 900 },  // 5 min per turn
+  kg: { step: 2.5, per: 20, min: 0, max: 500 },      // 50 kg per turn
+  reps: { step: 1, per: 20, min: 1, max: 100 },      // 20 reps per turn
+  sets: { step: 1, per: 10, min: 1, max: 20 },       // 10 sets per turn
+  rest: { step: 15, per: 20, min: 0, max: 900 },     // 5 min per turn
+  time: { step: 15, per: 24, min: 15, max: 10800 },  // 6 min per turn
+  km: { step: 0.5, per: 20, min: 0, max: 200 },      // 10 km per turn, 0 = not tracked
+  level: { step: 1, per: 20, min: 0, max: 30 },      // 0 = not tracked
 };
-const ORDER = ["kg", "reps", "sets", "rest"];
+const ORDER = { reps: ["kg", "reps", "sets", "rest"], time: ["time", "km", "level"] };
 const PRESETS = {
   reps: [5, 6, 8, 10, 12, 15],
   sets: [2, 3, 4, 5],
   rest: [45, 60, 90, 120, 180],
+  time: [60, 300, 600, 1200, 1800, 2700],
+  km: [0, 1, 2, 5, 10],
+  level: [0, 4, 6, 8, 10, 12],
+};
+
+// Every word on screen. A function takes the values it shows.
+const NB = " "; // French puts a non-breaking space before ? ! :
+const STR = {
+  en: {
+    locale: "en-GB", gym: "Gym", history: "History", settings: "Settings", back: "Back", remove: "Remove",
+    langSwitch: "Passer en français", type: "Type a value", kind: "Reps or time", edit: "Edit",
+    newTr: "New training", training: "Training", addEx: "Add exercise", start: "Start", del: "Delete",
+    minimize: "Back to trainings", overview: "All exercises", setDone: "Done", skip: "Skip", restGo: "Go!",
+    finish: "Finish", exName: "Exercise name", next: "Next", save: "Save", cancel: "Cancel",
+    f_kg: "kg", f_reps: "reps", f_sets: "sets", f_rest: "rest", f_time: "time", f_km: "km", f_level: "level",
+    bw: "bodyweight", bwShort: "BW", off: "–",
+    sound: "Click sound", awake: "Keep screen on",
+    dataHint: "Stored on this phone only.", export: "Export", import: "Import", wipe: "Erase all data",
+    nameTplPh: "e.g. Push day", undo: "Undo",
+    all: "All", addPart: "+ body part",
+    Chest: "Chest", Back: "Back", Legs: "Legs", Shoulders: "Shoulders", Arms: "Arms", Core: "Core", Cardio: "Cardio",
+    best: "New best!", plus: (d) => "+" + d + " vs last", same: "Same as last time", last: (v) => "Last: " + v,
+    lastChip: (v) => "Last " + v,
+    deleted: (n) => "Deleted “" + n + "”", removed: (n) => "Removed " + n, added: (n) => "Added " + n,
+    discarded: "Nothing done, workout discarded", saved: "Workout saved",
+    finishFirst: "Finish the running workout first", empty: "Add an exercise first",
+    noWorkouts: "No workouts yet.", wDeleted: "Workout deleted",
+    replace: (n) => "Replace what's on this phone with this backup (" + n + " workouts)?",
+    imported: "Backup imported", badBackup: "That isn't a Gym Log backup",
+    wipeQ: "Erase every workout and training on this phone?", erased: "Erased", saveFail: "Couldn't save on this phone",
+    setOf: (i, n) => "Set " + i + "/" + n,
+  },
+  fr: {
+    locale: "fr-FR", gym: "Muscu", history: "Historique", settings: "Réglages", back: "Retour", remove: "Retirer",
+    langSwitch: "Switch to English", type: "Saisir une valeur", kind: "Répétitions ou durée", edit: "Modifier",
+    newTr: "Nouvel entraînement", training: "Entraînement", addEx: "Ajouter un exercice", start: "Commencer", del: "Supprimer",
+    minimize: "Retour aux entraînements", overview: "Tous les exercices", setDone: "Fait", skip: "Passer", restGo: "Go" + NB + "!",
+    finish: "Terminer", exName: "Nom de l'exercice", next: "Suivant", save: "Enregistrer", cancel: "Annuler",
+    f_kg: "kg", f_reps: "rép.", f_sets: "séries", f_rest: "repos", f_time: "durée", f_km: "km", f_level: "niveau",
+    bw: "poids du corps", bwShort: "PDC", off: "–",
+    sound: "Son de clic", awake: "Garder l'écran allumé",
+    dataHint: "Stocké sur ce téléphone uniquement.", export: "Exporter", import: "Importer", wipe: "Tout effacer",
+    nameTplPh: "ex. Haut du corps", undo: "Annuler",
+    all: "Tout", addPart: "+ zone",
+    Chest: "Pectoraux", Back: "Dos", Legs: "Jambes", Shoulders: "Épaules", Arms: "Bras", Core: "Abdos", Cardio: "Cardio",
+    best: "Record" + NB + "!", plus: (d) => "+" + d + " vs la dernière fois", same: "Comme la dernière fois",
+    last: (v) => "Dernière fois" + NB + ": " + v, lastChip: (v) => "Dernier " + v,
+    deleted: (n) => "« " + n + " » supprimé", removed: (n) => n + " retiré", added: (n) => n + " ajouté",
+    discarded: "Rien de fait, séance annulée", saved: "Séance enregistrée",
+    finishFirst: "Termine d'abord la séance en cours", empty: "Ajoute d'abord un exercice",
+    noWorkouts: "Aucune séance pour l'instant.", wDeleted: "Séance supprimée",
+    replace: (n) => "Remplacer les données de ce téléphone par cette sauvegarde (" + n + " séances)" + NB + "?",
+    imported: "Sauvegarde importée", badBackup: "Ce n'est pas une sauvegarde Gym Log",
+    wipeQ: "Effacer toutes les séances et entraînements de ce téléphone" + NB + "?", erased: "Effacé", saveFail: "Impossible d'enregistrer sur ce téléphone",
+    setOf: (i, n) => "Série " + i + "/" + n,
+  },
 };
 
 const STORE = "gymlog.v1";
@@ -122,24 +113,57 @@ const STORE = "gymlog.v1";
 /* ------------------------------------------------------------------ */
 /*  State (this phone only)                                            */
 /* ------------------------------------------------------------------ */
-// workouts: finished sessions, newest last.
-// active:   the session in progress, or null.
-// item:     { id, name, part, kg, reps, sets, rest, done: [{ kg, reps, at }] }
+// trainings: the plans, each { id, name, auto, items: [item] }.
+//   auto: the name follows the body parts until you rename it.
+// item: { id, name, part, kind, kg, reps, sets, rest, time, km, level }
+// active: the workout being done, or null. A copy of a training whose items also
+//   carry done: [{ kg, reps, at }] (reps) or [{ time, km, level, at }] (time), plus
+//   run: { acc, from } for the stopwatch of a timed exercise.
+// workouts: finished ones, newest last.
 let state = load();
 
 function blank() {
   const lang = /^fr/i.test(navigator.language || "") ? "fr" : "en";
-  return { workouts: [], templates: [], active: null, settings: { sound: true, awake: true, lang } };
+  return { trainings: [], workouts: [], active: null, settings: { sound: true, awake: true, lang } };
+}
+
+function normItem(it) {
+  const kind = it.kind === "time" ? "time" : "reps";
+  return {
+    id: it.id || uid(), name: it.name, part: it.part || "", kind,
+    kg: it.kg ?? DEFAULTS.kg, reps: it.reps ?? DEFAULTS.reps, sets: kind === "time" ? 1 : it.sets ?? DEFAULTS.sets,
+    rest: it.rest ?? DEFAULTS.rest, time: it.time ?? DEFAULTS.time, km: it.km ?? 0, level: it.level ?? 0,
+  };
+}
+
+// Older versions kept "templates" and logged workouts without a plan.
+function migrate(v) {
+  const b = blank();
+  const s = { ...b, ...v, settings: { ...b.settings, ...(v.settings || {}) } };
+  if (Array.isArray(v.templates)) {
+    s.trainings = (s.trainings || []).concat(v.templates.map((tp) => ({ id: tp.id || uid(), name: tp.name, auto: false, items: tp.items.map(normItem) })));
+    delete s.templates;
+  }
+  s.workouts = (s.workouts || []).map((w) => ({ ...w, items: w.items.map((it) => ({ ...normItem(it), done: it.done || [] })) }));
+  if (s.active) {
+    const a = s.active;
+    a.items = a.items.map((it) => ({ ...normItem(it), done: it.done || [], run: it.run || null }));
+    if (a.idx == null) a.idx = Math.max(0, a.items.findIndex((it) => !complete(it)));
+    if (!a.items.length) s.active = null;
+  }
+  return s;
 }
 
 function load() {
+  let raw = null;
   try {
-    const v = JSON.parse(localStorage.getItem(STORE) || "null");
-    if (v && Array.isArray(v.workouts)) {
-      const b = blank();
-      return { ...b, ...v, settings: { ...b.settings, ...(v.settings || {}) } };
-    }
-  } catch (e) {}
+    raw = localStorage.getItem(STORE);
+    const v = JSON.parse(raw || "null");
+    if (v && Array.isArray(v.workouts)) return migrate(v);
+  } catch (e) {
+    // never overwrite data we couldn't read: keep a copy to recover from
+    try { if (raw) localStorage.setItem(STORE + ".unreadable-" + Date.now(), raw); } catch (e2) {}
+  }
   return blank();
 }
 
@@ -150,7 +174,9 @@ function save() {
 
 // For undo: a copy of everything before a destructive change.
 const snapshot = () => JSON.stringify(state);
-function restore(snap) { state = JSON.parse(snap); save(); renderHome(); }
+function restore(snap) { state = JSON.parse(snap); save(); route(); }
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
 /* ------------------------------------------------------------------ */
 /*  Language                                                           */
@@ -164,13 +190,12 @@ const partName = (p) => (p ? t(p) : "");
 // Small inline icon from the sprite in index.html.
 const ic = (name, cls) => '<svg class="ic' + (cls ? " " + cls : "") + '" aria-hidden="true"><use href="#i-' + name + '"/></svg>';
 
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-
 /* ------------------------------------------------------------------ */
 /*  Tiny DOM helpers                                                   */
 /* ------------------------------------------------------------------ */
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+const onScreen = (id) => $("#" + id).classList.contains("active");
 
 function showScreen(id) {
   $$(".screen").forEach((s) => s.classList.remove("active"));
@@ -186,17 +211,17 @@ let toastTimer = null;
 let toastAction = null;
 // action: optional { label, fn }, e.g. Undo. Toasts with an action stay a bit longer.
 function toast(msg, isErr, action) {
-  const t = $("#toast");
+  const el = $("#toast");
   $("#toast-msg").textContent = msg;
   const btn = $("#toast-act");
   toastAction = action ? action.fn : null;
   btn.hidden = !action;
   if (action) btn.textContent = action.label;
-  t.classList.toggle("err", !!isErr);
-  t.classList.toggle("high", !$("#rest").hidden && $("#screen-home").classList.contains("active"));
-  t.hidden = false;
+  el.classList.toggle("err", !!isErr);
+  el.classList.toggle("high", onScreen("screen-plan") || onScreen("screen-do"));
+  el.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.hidden = true; toastAction = null; }, action ? 5000 : 2400);
+  toastTimer = setTimeout(() => { el.hidden = true; toastAction = null; }, action ? 5000 : 2400);
 }
 
 /* ------------------------------------------------------------------ */
@@ -234,24 +259,25 @@ function audio() {
 }
 
 function tone(freq, dur, vol, type, delay) {
+  if (!state.settings.sound) return;
   const a = audio();
   if (!a) return;
-  const t = a.currentTime + (delay || 0);
+  const t0 = a.currentTime + (delay || 0);
   const o = a.createOscillator();
   const g = a.createGain();
   o.type = type || "sine";
   o.frequency.value = freq;
-  g.gain.setValueAtTime(vol, t);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  g.gain.setValueAtTime(vol, t0);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
   o.connect(g).connect(a.destination);
-  o.start(t);
-  o.stop(t + dur + 0.02);
+  o.start(t0);
+  o.stop(t0 + dur + 0.02);
 }
 
 // One detent of the wheel.
 function click() {
   haptic();
-  if (state.settings.sound) tone(2400, 0.025, 0.06, "triangle");
+  tone(2400, 0.025, 0.06, "triangle");
 }
 
 function beep() {
@@ -283,16 +309,12 @@ document.addEventListener("click", unlockAudio, true);
 /* ------------------------------------------------------------------ */
 /*  Formatting                                                         */
 /* ------------------------------------------------------------------ */
-function fmtKg(v) {
-  if (!v) return t("bwShort");
+function num(v) {
   return String(Math.round(v * 100) / 100).replace(".", lang() === "fr" ? "," : ".");
 }
-function fmtRest(s) {
+function fmtKg(v) { return v ? num(v) : t("bwShort"); }
+function fmtDur(s) {
   s = Math.max(0, Math.round(s));
-  return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
-}
-function fmtClock(ms) {
-  const s = Math.max(0, Math.floor(ms / 1000));
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
   const ss = String(s % 60).padStart(2, "0");
@@ -300,224 +322,474 @@ function fmtClock(ms) {
 }
 function fmtMins(ms) {
   const m = Math.round(ms / 60000);
-  return m < 60 ? m + " min" : Math.floor(m / 60) + "h " + String(m % 60).padStart(2, "0");
+  return m < 60 ? m + " min" : Math.floor(m / 60) + "h" + String(m % 60).padStart(2, "0");
 }
 function fmtVolume(kg) {
-  return kg >= 1000 ? (Math.round(kg / 100) / 10) + " t" : Math.round(kg) + " kg";
+  return kg >= 1000 ? num(Math.round(kg / 100) / 10) + " t" : Math.round(kg) + " kg";
 }
 function fmtField(f, v) {
   if (f === "kg") return fmtKg(v);
-  if (f === "rest") return fmtRest(v);
+  if (f === "rest" || f === "time") return fmtDur(v);
+  if (f === "km") return v ? num(v) : t("off");
+  if (f === "level") return v ? String(v) : t("off");
   return String(v);
 }
-function specLine(it) {
-  const w = it.kg ? "<b>" + fmtKg(it.kg) + " kg</b>" : "<b>" + t("bw") + "</b>";
-  return w + " × " + it.reps + " · " + it.sets + " " + t("sets") + " · " + fmtRest(it.rest) + " " + t("restWord");
+// The short line under an exercise name: "60 kg · 4×8 · ⏱1:30" or "⏱20:00 · 5 km · L8".
+function specHtml(it) {
+  if (it.kind === "time") {
+    return ic("timer", "xs") + fmtDur(it.time) + (it.km ? " · " + num(it.km) + " km" : "") + (it.level ? " · L" + it.level : "");
+  }
+  return (it.kg ? fmtKg(it.kg) + " kg" : t("bwShort")) + " · " + it.sets + "×" + it.reps + " · " + ic("timer", "xs") + fmtDur(it.rest);
 }
 const key = (name) => String(name).trim().toLowerCase();
+const isTimed = (name, part) => part === "Cardio" || TIMED.has(key(name));
+// (a function declaration, so loading old data can use it before this line runs)
+function complete(it) { return it.done.length >= (it.kind === "time" ? 1 : it.sets); }
 
 /* ------------------------------------------------------------------ */
 /*  Library: everything you've done, so repeats are one tap            */
 /* ------------------------------------------------------------------ */
-// name -> { name, part, kg, reps, sets, rest, best, count, at }
+// name -> item values last used, plus best kg / longest time, and when.
 function library() {
   const lib = new Map();
-  const put = (it, at, real) => {
+  const put = (it, at) => {
     const k = key(it.name);
     const prev = lib.get(k);
-    const done = (it.done || []).filter((d) => d.kg != null);
-    const best = Math.max(prev ? prev.best : 0, ...done.map((d) => d.kg));
-    lib.set(k, {
-      name: it.name, part: it.part || (prev && prev.part) || "",
-      kg: it.kg, reps: it.reps, sets: it.sets, rest: it.rest,
-      best, count: (prev ? prev.count : 0) + (real ? 1 : 0), at: at || (prev && prev.at) || 0,
-    });
+    const done = it.done || [];
+    const best = Math.max(prev ? prev.best : 0, ...done.map((d) => d.kg || 0));
+    if (prev && prev.at > at) { prev.best = best; return; }
+    lib.set(k, { ...normItem(it), best, at });
   };
-  // templates first, so anything you actually did wins
-  state.templates.forEach((t) => t.items.forEach((it) => { if (!lib.has(key(it.name))) put(it, 0, false); }));
-  state.workouts.forEach((w) => w.items.forEach((it) => put(it, w.start, true)));
+  state.trainings.forEach((tr) => tr.items.forEach((it) => put(it, 0)));
+  state.workouts.forEach((w) => w.items.forEach((it) => { if (it.done.length) put(it, w.start); }));
   return lib;
 }
 
 /* ------------------------------------------------------------------ */
-/*  Home                                                               */
+/*  Routing: show whatever the state says                              */
 /* ------------------------------------------------------------------ */
-function renderHome() {
-  const a = state.active;
-  $("#home-idle").hidden = !!a;
-  $("#home-active").hidden = !a;
-  if (a) renderWorkout(); else renderIdle();
-  renderRest();
-  tickClock();
+function route() {
+  if (onScreen("screen-do") && state.active) renderDo();
+  else if (onScreen("screen-plan") && plan()) renderPlan();
+  else if (onScreen("screen-history")) renderHistory();
+  else { showScreen("screen-home"); renderHome(); }
   keepAwake();
 }
 
-function renderIdle() {
-  const last = state.workouts[state.workouts.length - 1];
-  $("#idle-sub").textContent = last
-    ? t("idleLast", new Date(last.start).toLocaleDateString(t("locale"), { weekday: "long", day: "numeric", month: "short" }), last.name)
-    : t("idleNone");
-
-  const list = $("#tpl-list");
+/* ------------------------------------------------------------------ */
+/*  Home: trainings                                                    */
+/* ------------------------------------------------------------------ */
+function renderHome() {
+  const a = state.active;
+  $("#resume").hidden = !a;
+  if (a) {
+    $("#resume-name").textContent = a.name;
+    $("#resume-clock").textContent = fmtDur((Date.now() - a.start) / 1000);
+  }
+  const list = $("#tr-list");
   list.innerHTML = "";
-  $("#tpl-wrap").hidden = !state.templates.length;
-  state.templates.forEach((tp) => {
+  state.trainings.forEach((tr) => {
+    if (a && a.trainingId === tr.id) return; // the green bar above already stands for it
     const el = document.createElement("div");
-    el.className = "tpl";
+    el.className = "tr";
     el.innerHTML =
-      '<div class="tpl-main"><div class="tpl-name">' + escapeHtml(tp.name) + "</div>" +
-      '<div class="tpl-sub">' + escapeHtml(tp.items.map((i) => i.name).join(" · ")) + "</div></div>" +
-      '<span class="tpl-go">' + t("go") + "</span>" +
-      '<button class="mini-btn" type="button" aria-label="' + t("delTpl") + '">' + ic("x") + "</button>";
-    el.querySelector(".tpl-main").onclick = () => startWorkout(tp.items, tp.name);
-    el.querySelector(".tpl-go").onclick = () => startWorkout(tp.items, tp.name);
-    el.querySelector(".mini-btn").onclick = (e) => {
-      e.stopPropagation();
-      const snap = snapshot();
-      state.templates = state.templates.filter((x) => x.id !== tp.id);
-      save(); renderIdle();
-      toast(t("deleted", tp.name), false, { label: t("undo"), fn: () => restore(snap) });
-    };
+      '<div class="tr-main"><div class="tr-name">' + escapeHtml(tr.name) + "</div>" +
+      '<div class="tr-sub">' + escapeHtml(tr.items.map((i) => i.name).join(" · ")) + "</div></div>" +
+      '<button class="play" type="button" aria-label="' + t("start") + '">' + ic("play") + "</button>";
+    el.querySelector(".tr-main").onclick = () => openPlan(tr.id);
+    el.querySelector(".play").onclick = () => startTraining(tr.id);
     list.appendChild(el);
   });
+  $("#new-tr").classList.toggle("first", !state.trainings.length);
 }
 
-// From a training or a past workout: the same exercises, at the values you used last.
-function startWorkout(items, name) {
-  const lib = library();
+$("#resume").onclick = () => { showScreen("screen-do"); renderDo(); };
+
+$("#new-tr").onclick = () => {
+  const tr = { id: uid(), name: t("training") + " " + (state.trainings.length + 1), auto: true, items: [] };
+  state.trainings.push(tr);
+  save();
+  planId = tr.id;
+  openPick("plan");
+};
+
+/* ------------------------------------------------------------------ */
+/*  Plan: one training's exercises                                     */
+/* ------------------------------------------------------------------ */
+let planId = null;
+const plan = () => state.trainings.find((x) => x.id === planId);
+
+function autoName(tr) {
+  if (!tr.auto) return;
+  const parts = [];
+  tr.items.forEach((it) => { if (it.part && parts.indexOf(it.part) < 0) parts.push(it.part); });
+  if (parts.length) tr.name = parts.slice(0, 3).map(partName).join(" + ");
+}
+
+function openPlan(id) {
+  planId = id;
+  showScreen("screen-plan");
+  renderPlan();
+}
+
+function renderPlan() {
+  const tr = plan();
+  $("#plan-name").textContent = tr.name;
+  const list = $("#plan-list");
+  list.innerHTML = "";
+  tr.items.forEach((it) => {
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "row-card";
+    el.innerHTML =
+      '<span class="rc-main"><span class="rc-name">' + escapeHtml(it.name) + '<span class="part-tag">' + escapeHtml(partName(it.part)) + "</span></span>" +
+      '<span class="rc-spec">' + specHtml(it) + "</span></span>";
+    el.onclick = () => openWheel({ ctx: "plan", mode: "edit", item: it });
+    list.appendChild(el);
+  });
+  $("#plan-add").classList.toggle("first", !tr.items.length);
+  $("#plan-start").disabled = !tr.items.length;
+}
+
+$("#plan-back").onclick = () => {
+  const tr = plan();
+  // a training you never put anything in isn't a training
+  if (tr && !tr.items.length) { state.trainings = state.trainings.filter((x) => x !== tr); save(); }
+  showScreen("screen-home");
+  renderHome();
+};
+$("#plan-add").onclick = () => openPick("plan");
+$("#plan-start").onclick = () => startTraining(planId);
+$("#plan-name").onclick = () => askName(plan());
+$("#plan-del").onclick = () => {
+  const tr = plan();
+  const snap = snapshot();
+  state.trainings = state.trainings.filter((x) => x !== tr);
+  save();
+  showScreen("screen-home");
+  renderHome();
+  toast(t("deleted", tr.name), false, { label: t("undo"), fn: () => restore(snap) });
+};
+
+// Rename sheet.
+let sheetFn = null;
+function askName(tr) {
+  const inp = $("#sheet-input");
+  inp.value = tr.name;
+  $("#sheet").hidden = false;
+  sheetFn = () => {
+    const name = inp.value.trim();
+    if (!name) return;
+    tr.name = name;
+    tr.auto = false;
+    save();
+    closeSheet();
+    renderPlan();
+  };
+  setTimeout(() => { inp.focus(); inp.select(); }, 50);
+}
+function closeSheet() { $("#sheet").hidden = true; $("#sheet-input").blur(); sheetFn = null; }
+$("#sheet-ok").onclick = () => sheetFn && sheetFn();
+$("#sheet-cancel").onclick = closeSheet;
+$("#sheet").onclick = (e) => { if (e.target.id === "sheet") closeSheet(); };
+$("#sheet-input").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); sheetFn && sheetFn(); } });
+
+/* ------------------------------------------------------------------ */
+/*  Do: the workout, one exercise at a time                            */
+/* ------------------------------------------------------------------ */
+function startTraining(id) {
+  const tr = state.trainings.find((x) => x.id === id);
+  if (!tr) return;
+  if (state.active) {
+    if (state.active.trainingId !== id) toast(t("finishFirst"), true);
+    else { showScreen("screen-do"); renderDo(); }
+    return;
+  }
+  if (!tr.items.length) { toast(t("empty"), true); return; }
   state.active = {
-    id: uid(), start: Date.now(), name: name || "", rest: null,
-    items: (items || []).map((it) => {
-      const l = lib.get(key(it.name)) || it;
-      return { id: uid(), name: it.name, part: it.part || l.part || "", kg: l.kg, reps: l.reps, sets: l.sets, rest: l.rest, done: [] };
-    }),
+    id: uid(), trainingId: tr.id, name: tr.name, start: Date.now(), idx: 0, rest: null,
+    items: tr.items.map((it) => ({ ...normItem(it), id: uid(), done: [], run: null })),
   };
   save();
-  renderHome();
-  if (!state.active.items.length) openPick();
+  haptic();
+  showScreen("screen-do");
+  renderDo();
+  keepAwake();
 }
 
-function nextItem() {
-  return state.active && state.active.items.find((it) => it.done.length < it.sets);
-}
-
-function renderWorkout() {
-  const a = state.active;
-  const list = $("#ex-list");
-  list.innerHTML = "";
-  const next = nextItem();
-  a.items.forEach((it) => {
-    const complete = it.done.length >= it.sets;
-    const el = document.createElement("div");
-    el.className = "ex" + (complete ? " complete" : "") + (it === next ? " next" : "");
-    const n = Math.max(it.sets, it.done.length);
-    let dots = "";
-    for (let i = 0; i < n; i++) dots += '<button class="dot' + (i < it.done.length ? " on" : "") + '" data-i="' + i + '" type="button">' + (i < it.done.length ? ic("check") : "") + "</button>";
-    el.innerHTML =
-      '<div class="ex-main"><div class="ex-name">' + escapeHtml(it.name) +
-      '<span class="part-tag">' + escapeHtml(partName(it.part)) + "</span></div>" +
-      '<div class="ex-spec">' + specLine(it) + "</div>" +
-      '<div class="dots">' + dots + "</div></div>" +
-      '<button class="tick' + (complete ? " all" : "") + '" type="button" aria-label="' + t("setDone") + '">' +
-      (complete ? ic("check", "lg") : it.done.length + 1 + "") + "</button>";
-    el.querySelector(".ex-main").onclick = (e) => {
-      const dot = e.target.closest(".dot");
-      if (dot) setDone(it, +dot.dataset.i < it.done.length ? +dot.dataset.i : +dot.dataset.i + 1);
-      else openWheel({ mode: "edit", item: it });
-    };
-    el.querySelector(".tick").onclick = () => {
-      if (complete) { toast(t("exDone", it.name)); return; }
-      setDone(it, it.done.length + 1);
-    };
-    list.appendChild(el);
-  });
-  const add = $("#add-ex");
-  add.classList.toggle("first", !a.items.length);
-  $("#save-tpl").hidden = !a.items.length;
-}
-
-// Tick (or untick) sets so exactly `count` are done.
-function setDone(it, count) {
-  const before = it.done.length;
-  if (count > before) {
-    for (let i = before; i < count; i++) it.done.push({ kg: it.kg, reps: it.reps, at: Date.now() });
-    haptic();
-    const after = nextItem();
-    if (after) startRest(it.rest, after === it ? { set: it.done.length + 1, of: it.sets } : { name: after.name });
-    else { state.active.rest = null; toast(t("allDone")); }
-  } else {
-    it.done.length = count;
-    haptic();
+const cur = () => state.active.items[state.active.idx];
+const elapsed = (it) => (it.run ? it.run.acc + (it.run.from ? Date.now() - it.run.from : 0) : 0) / 1000;
+// The next exercise with sets left, looking forward from the current one.
+function nextOpen(from) {
+  const items = state.active.items;
+  for (let k = 1; k <= items.length; k++) {
+    const j = (from + k) % items.length;
+    if (!complete(items[j])) return j;
   }
-  save();
-  renderHome();
+  return -1;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Rest timer                                                         */
-/* ------------------------------------------------------------------ */
-// next: what comes after the rest, kept as facts so the label follows the language
-function startRest(secs, next) {
-  if (!secs) { state.active.rest = null; return; }
-  state.active.rest = { end: Date.now() + secs * 1000, total: secs, next, rang: false };
+const BIG_C = 2 * Math.PI * 96;
+function renderDo() {
+  const a = state.active;
+  if (!a) { showScreen("screen-home"); renderHome(); return; }
+  const allDone = a.items.every(complete);
+
+  // the little pills on top: one per exercise
+  const steps = $("#do-steps");
+  steps.innerHTML = "";
+  a.items.forEach((it, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "step" + (complete(it) ? " done" : "") + (i === a.idx && !allDone ? " cur" : "");
+    b.setAttribute("aria-label", it.name);
+    b.onclick = () => { a.idx = i; a.rest = null; save(); haptic(); renderDo(); };
+    steps.appendChild(b);
+  });
+  $("#do-clock").textContent = fmtDur((Date.now() - a.start) / 1000);
+
+  $("#do-rest").hidden = !a.rest;
+  $("#do-end").hidden = !!a.rest || !allDone;
+  $("#do-ex").hidden = !!a.rest || allDone;
+  if (a.rest) return renderRest();
+  if (allDone) return renderEnd();
+
+  const it = cur();
+  $("#do-name").textContent = it.name;
+  $("#do-part").textContent = partName(it.part);
+  const big = $("#do-big");
+  const main = $("#do-main");
+  const doneBtn = $("#do-done");
+  if (it.kind === "time") {
+    const el = elapsed(it);
+    const frac = Math.min(1, el / it.time);
+    const over = el >= it.time;
+    big.className = "do-big timed" + (over ? " over" : "");
+    big.innerHTML =
+      '<svg class="big-ring" viewBox="0 0 200 200"><circle cx="100" cy="100" r="96" class="br-track"/>' +
+      '<circle cx="100" cy="100" r="96" class="br-arc" style="stroke-dasharray:' + BIG_C + ";stroke-dashoffset:" + BIG_C * (1 - frac) + '"/></svg>' +
+      '<span class="br-in"><b>' + fmtDur(el) + "</b><small>/ " + fmtDur(it.time) + "</small></span>";
+    $("#do-sub").innerHTML = [it.km ? num(it.km) + " km" : "", it.level ? "L" + it.level : ""].filter(Boolean).join(" · ");
+    const running = it.run && it.run.from;
+    main.innerHTML = ic(running ? "pause" : "play", "lg");
+    main.setAttribute("aria-label", running ? "pause" : t("start"));
+    doneBtn.hidden = el < 1;
+  } else {
+    big.className = "do-big";
+    big.innerHTML = "<b>" + (it.kg ? fmtKg(it.kg) : t("bwShort")) + "</b>" + (it.kg ? "<small>kg</small>" : "") +
+      '<span class="x">×</span><b>' + it.reps + "</b>";
+    let dots = "";
+    for (let i = 0; i < Math.max(it.sets, it.done.length); i++) {
+      dots += '<button class="dot' + (i < it.done.length ? " on" : "") + '" data-i="' + i + '" type="button">' + (i < it.done.length ? ic("check") : "") + "</button>";
+    }
+    $("#do-sub").innerHTML = '<div class="dots">' + dots + "</div>";
+    main.innerHTML = ic("check", "xl");
+    main.setAttribute("aria-label", t("setDone"));
+    doneBtn.hidden = true;
+  }
 }
 
-const REST_C = 2 * Math.PI * 19;
 function renderRest() {
-  const r = state.active && state.active.rest;
-  const bar = $("#rest");
-  bar.hidden = !r;
-  $("#home-active").classList.toggle("resting", !!r);
-  $("#toast").classList.toggle("high", !!r && $("#screen-home").classList.contains("active"));
-  if (!r) return;
+  const r = state.active.rest;
   const left = (r.end - Date.now()) / 1000;
-  const over = left <= 0;
-  bar.classList.toggle("over", over);
-  $("#rest-time").textContent = over ? t("restGo") : fmtRest(Math.ceil(left));
-  const n = r.next || {};
-  const label = n.name ? t("nextEx", n.name) : n.set ? t("nextSet", n.set, n.of) : t("rest");
-  $("#rest-label").textContent = over ? label + " · +" + fmtRest(-left) : label;
-  const arc = $("#rest-arc");
-  arc.style.strokeDasharray = REST_C;
-  arc.style.strokeDashoffset = over ? 0 : REST_C * (1 - left / r.total);
-  if (over && !r.rang) {
-    r.rang = true;
+  if (left <= 0) {
+    // rest is over: back to the exercise, with a beep and a pulse on the button
+    state.active.rest = null;
     save();
     beep();
+    renderDo();
+    const m = $("#do-main");
+    m.classList.remove("pulse");
+    void m.offsetWidth;
+    m.classList.add("pulse");
+    return;
   }
-  // nobody needs the bar a minute after it rang
-  if (left < -60) { state.active.rest = null; save(); renderRest(); }
+  $("#rest-time").textContent = fmtDur(Math.ceil(left));
+  const n = r.next || {};
+  $("#rest-next").textContent = n.name ? n.name : n.set ? t("setOf", n.set, n.of) : "";
+  const C = 2 * Math.PI * 90;
+  const arc = $("#rest-arc");
+  arc.style.strokeDasharray = C;
+  arc.style.strokeDashoffset = C * (1 - left / r.total);
 }
+
+function renderEnd() {
+  const st = workoutStats(state.active);
+  $("#do-stats").innerHTML = statsHtml(st);
+}
+
+function statsHtml(st) {
+  return '<div class="stat">' + ic("timer") + "<b>" + fmtMins(st.ms) + "</b></div>" +
+    '<div class="stat">' + ic("check") + "<b>" + st.sets + "</b></div>" +
+    (st.volume ? '<div class="stat">' + ic("weight") + "<b>" + fmtVolume(st.volume) + "</b></div>" : "");
+}
+
+// Tick a set (reps) or finish a timed exercise, then rest and/or move on.
+function doneSet() {
+  const a = state.active;
+  const it = cur();
+  if (it.kind === "time") {
+    const secs = Math.round(elapsed(it));
+    it.run = null;
+    it.done = [{ time: secs, km: it.km, level: it.level, at: Date.now() }];
+  } else {
+    it.done.push({ kg: it.kg, reps: it.reps, at: Date.now() });
+  }
+  haptic();
+  const nxt = complete(it) ? nextOpen(a.idx) : a.idx;
+  if (nxt >= 0) {
+    const restSecs = it.kind === "time" ? 0 : it.rest;
+    if (nxt !== a.idx) a.idx = nxt;
+    a.rest = restSecs
+      ? { end: Date.now() + restSecs * 1000, total: restSecs, next: nxt === state.active.items.indexOf(it) ? { set: it.done.length + 1, of: it.sets } : { name: a.items[nxt].name } }
+      : null;
+  } else {
+    a.rest = null;
+  }
+  save();
+  renderDo();
+}
+
+$("#do-main").onclick = () => {
+  const it = cur();
+  if (it.kind === "time") {
+    // play / pause the stopwatch
+    if (!it.run) it.run = { acc: 0, from: null };
+    if (it.run.from) { it.run.acc += Date.now() - it.run.from; it.run.from = null; }
+    else it.run.from = Date.now();
+    haptic();
+    save();
+    renderDo();
+  } else doneSet();
+};
+$("#do-done").onclick = doneSet;
+$("#do-big").onclick = () => openWheel({ ctx: "do", mode: "edit", item: cur() });
+
+// tap a ticked dot to untick it
+$("#do-sub").addEventListener("click", (e) => {
+  const dot = e.target.closest(".dot");
+  if (!dot) return;
+  const it = cur();
+  const i = +dot.dataset.i;
+  if (i < it.done.length) it.done.length = i;
+  else for (let k = it.done.length; k <= i; k++) it.done.push({ kg: it.kg, reps: it.reps, at: Date.now() });
+  haptic();
+  save();
+  renderDo();
+});
 
 function adjustRest(d) {
-  const r = state.active && state.active.rest;
-  if (!r) return;
-  const left = Math.max(0, r.end - Date.now());
-  r.end = Date.now() + Math.max(0, left + d * 1000);
+  const r = state.active.rest;
+  r.end = Math.max(Date.now() + 1000, r.end + d * 1000);
   r.total = Math.max(r.total + d, 1);
-  r.rang = false;
   save(); haptic(); renderRest();
 }
-
 $("#rest-plus").onclick = () => adjustRest(15);
 $("#rest-minus").onclick = () => adjustRest(-15);
-$("#rest-skip").onclick = () => { if (state.active) { state.active.rest = null; save(); renderRest(); } };
+$("#rest-skip").onclick = () => { state.active.rest = null; save(); haptic(); renderDo(); };
 
-function tickClock() {
-  const el = $("#clock");
-  if (state.active) {
-    el.textContent = fmtClock(Date.now() - state.active.start);
-    el.classList.add("live");
-  } else {
-    el.textContent = t("gym");
-    el.classList.remove("live");
+$("#do-min").onclick = () => { showScreen("screen-home"); renderHome(); };
+
+// swipe left / right on the exercise to move between exercises
+(function swipe() {
+  const el = $("#do-ex");
+  let s = null;
+  el.addEventListener("touchstart", (e) => { const p = e.touches[0]; s = { x: p.clientX, y: p.clientY }; }, { passive: true });
+  el.addEventListener("touchend", (e) => {
+    if (!s || !state.active) return;
+    const p = e.changedTouches[0];
+    const dx = p.clientX - s.x, dy = p.clientY - s.y;
+    s = null;
+    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const a = state.active;
+    const j = a.idx + (dx < 0 ? 1 : -1);
+    if (j < 0 || j >= a.items.length) return;
+    a.idx = j;
+    save();
+    haptic();
+    renderDo();
+    el.classList.remove("slide-l", "slide-r");
+    void el.offsetWidth;
+    el.classList.add(dx < 0 ? "slide-l" : "slide-r");
+  });
+})();
+
+// Overview sheet: every exercise, jump to one, add one, finish.
+function openOver() {
+  const a = state.active;
+  const list = $("#over-list");
+  list.innerHTML = "";
+  a.items.forEach((it, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "over-row" + (i === a.idx ? " cur" : "") + (complete(it) ? " done" : "");
+    const prog = it.kind === "time" ? (complete(it) ? ic("check") : "") : it.done.length + "/" + it.sets;
+    b.innerHTML = '<span class="or-name">' + escapeHtml(it.name) + '</span><span class="or-prog">' + prog + "</span>";
+    b.onclick = () => { a.idx = i; a.rest = null; save(); closeOver(); renderDo(); };
+    list.appendChild(b);
+  });
+  $("#sheet-over").hidden = false;
+}
+function closeOver() { $("#sheet-over").hidden = true; }
+$("#do-list").onclick = openOver;
+$("#sheet-over").onclick = (e) => { if (e.target.id === "sheet-over") closeOver(); };
+$("#over-add").onclick = () => { closeOver(); openPick("do"); };
+$("#over-finish").onclick = () => { closeOver(); finishWorkout(); };
+$("#do-finish").onclick = finishWorkout;
+
+function workoutStats(w) {
+  let sets = 0, volume = 0;
+  w.items.forEach((it) => it.done.forEach((d) => { sets++; volume += (d.kg || 0) * (d.reps || 0); }));
+  return { sets, volume, ms: (w.end || Date.now()) - w.start };
+}
+
+function finishWorkout() {
+  const a = state.active;
+  const snap = snapshot();
+  // a stopwatch still running counts up to now
+  a.items.forEach((it) => { if (it.kind === "time" && !it.done.length && elapsed(it) >= 1) it.done = [{ time: Math.round(elapsed(it)), km: it.km, level: it.level, at: Date.now() }]; it.run = null; });
+  const st = workoutStats(a);
+  state.active = null;
+  if (!st.sets) {
+    save();
+    showScreen("screen-home");
+    renderHome();
+    keepAwake();
+    toast(t("discarded"), false, { label: t("undo"), fn: () => { restore(snap); showScreen("screen-do"); renderDo(); } });
+    return;
   }
+  a.end = Date.now();
+  delete a.rest;
+  delete a.idx;
+  state.workouts.push(a);
+  // the plan learns: next time starts from what you actually used today
+  const tr = state.trainings.find((x) => x.id === a.trainingId);
+  if (tr) tr.items = a.items.map((it) => normItem({ ...it, id: undefined }));
+  save();
+  showScreen("screen-home");
+  renderHome();
+  keepAwake();
+  toast(t("saved"));
 }
 
 setInterval(() => {
-  if (!state.active) return;
-  tickClock();
-  if (state.active.rest) renderRest();
+  const a = state.active;
+  if (!a) return;
+  if (onScreen("screen-do")) {
+    $("#do-clock").textContent = fmtDur((Date.now() - a.start) / 1000);
+    if (a.rest) renderRest();
+    else {
+      const it = cur();
+      if (it && it.kind === "time" && it.run && it.run.from) {
+        const was = it._over;
+        renderDo();
+        // one beep when the target time is reached
+        if (!was && elapsed(it) >= it.time) { it._over = true; beep(); }
+      }
+    }
+  } else if (onScreen("screen-home")) {
+    $("#resume-clock").textContent = fmtDur((Date.now() - a.start) / 1000);
+  }
 }, 250);
 
 /* ------------------------------------------------------------------ */
@@ -538,15 +810,17 @@ async function keepAwake() {
 }
 document.addEventListener("visibilitychange", () => {
   keepAwake();
-  if (!document.hidden && state.active) renderRest();
+  if (!document.hidden && state.active && onScreen("screen-do")) renderDo();
 });
 
 /* ------------------------------------------------------------------ */
 /*  Pick an exercise                                                   */
 /* ------------------------------------------------------------------ */
 let pickPart = "";
+let pickCtx = "plan"; // "plan": into the training; "do": into the running workout
 
-function openPick() {
+function openPick(ctx) {
+  pickCtx = ctx;
   $("#ex-name").value = "";
   showScreen("screen-pick");
   renderParts();
@@ -571,32 +845,30 @@ function partOf(name) {
   return PARTS.find((p) => ["en", "fr"].some((l) => STARTERS[l][p].some((s) => key(s) === k))) || "";
 }
 
+function pickItems() {
+  return pickCtx === "do" ? state.active.items : plan() ? plan().items : [];
+}
+
 function renderSuggest() {
   const q = key($("#ex-name").value);
   $("#name-next").hidden = !q;
   const lib = library();
-  const inWorkout = new Set(state.active ? state.active.items.map((i) => key(i.name)) : []);
+  const taken = new Set(pickItems().map((i) => key(i.name)));
   const match = (name, part) => (q ? key(name).includes(q) : !pickPart || part === pickPart);
 
   const recent = Array.from(lib.values())
-    .filter((e) => match(e.name, e.part) && !inWorkout.has(key(e.name)))
-    .sort((a, b) => b.at - a.at || b.count - a.count);
+    .filter((e) => match(e.name, e.part) && !taken.has(key(e.name)))
+    .sort((a, b) => b.at - a.at);
   const known = new Set(Array.from(lib.keys()));
   const ideas = [];
   (pickPart && !q ? [pickPart] : PARTS).forEach((p) =>
     STARTERS[lang()][p].forEach((n) => {
-      if (!known.has(key(n)) && !inWorkout.has(key(n)) && match(n, p)) ideas.push({ name: n, part: p });
+      if (!known.has(key(n)) && !taken.has(key(n)) && match(n, p)) ideas.push({ name: n, part: p });
     })
   );
 
   const list = $("#suggest");
   list.innerHTML = "";
-  const head = (t) => {
-    const h = document.createElement("div");
-    h.className = "sg-head";
-    h.textContent = t;
-    list.appendChild(h);
-  };
   const row = (name, right, cls, fn) => {
     const b = document.createElement("button");
     b.type = "button";
@@ -605,61 +877,77 @@ function renderSuggest() {
     b.onclick = fn;
     list.appendChild(b);
   };
-
-  if (recent.length) head(t("yours"));
-  recent.slice(0, 12).forEach((e) =>
-    row(e.name, escapeHtml(fmtKg(e.kg) + (e.kg ? " kg" : "") + " · " + e.sets + "×" + e.reps), "recent", () =>
-      openWheel({ mode: "known", name: e.name, part: e.part, vals: e, last: e })
-    )
-  );
-  if (ideas.length) head(recent.length ? t("ideas") : t("pickOne"));
-  ideas.forEach((e) => row(e.name, escapeHtml(t(e.part)), "", () => openWheel({ mode: "new", name: e.name, part: e.part })));
+  recent.slice(0, 12).forEach((e) => row(e.name, specHtml(e), "recent", () => openWheel({ ctx: pickCtx, mode: "known", vals: e, last: e })));
+  ideas.forEach((e) => row(e.name, escapeHtml(t(e.part)), "", () => openWheel({ ctx: pickCtx, mode: "new", name: e.name, part: e.part })));
 }
 
 function pickTyped() {
   const name = $("#ex-name").value.trim();
   if (!name) return;
   const e = library().get(key(name));
-  if (e) openWheel({ mode: "known", name: e.name, part: e.part, vals: e, last: e });
-  else openWheel({ mode: "new", name: name.charAt(0).toUpperCase() + name.slice(1), part: pickPart || partOf(name) });
+  if (e) openWheel({ ctx: pickCtx, mode: "known", vals: e, last: e });
+  else openWheel({ ctx: pickCtx, mode: "new", name: name.charAt(0).toUpperCase() + name.slice(1), part: pickPart || partOf(name) });
 }
 
 $("#ex-name").addEventListener("input", renderSuggest);
 $("#ex-name").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); pickTyped(); } });
 $("#name-next").onclick = pickTyped;
-$("#pick-back").onclick = () => {
-  // a fresh workout you backed out of before adding anything isn't a workout
-  if (state.active && !state.active.items.length) { state.active = null; save(); }
-  showScreen("screen-home");
-  renderHome();
-};
+$("#pick-back").onclick = backFromPick;
+function backFromPick() {
+  if (pickCtx === "do") { showScreen("screen-do"); renderDo(); return; }
+  const tr = plan();
+  if (tr && !tr.items.length) { state.trainings = state.trainings.filter((x) => x !== tr); save(); showScreen("screen-home"); renderHome(); return; }
+  openPlan(planId);
+}
 
 /* ------------------------------------------------------------------ */
 /*  The wheel                                                          */
 /* ------------------------------------------------------------------ */
-// mode: "new" walks Weight → Reps → Sets → Rest; "known" is prefilled from last
-// time, one tap adds it; "edit" changes an exercise already in the workout.
+// ctx: "plan" or "do" — where the exercise lives and where we go back to.
+// mode: "new" walks through every field; "known" is prefilled from last time, one
+// tap adds it; "edit" changes an exercise already in the plan or the workout.
 let W = null;
 
-function openWheel(opts) {
-  const src = opts.item || opts.vals || DEFAULTS;
+function openWheel(o) {
+  const src = o.item || o.vals || null;
+  const name = src ? src.name : o.name;
+  const part = src ? src.part : o.part || "";
+  const kind = src ? src.kind : isTimed(name, part) ? "time" : "reps";
+  const vals = { ...DEFAULTS, ...(src ? normItem(src) : {}) };
+  if (!src && TIMED.has(key(name))) vals.time = 60; // a plank isn't ten minutes
   W = {
-    mode: opts.mode,
-    item: opts.item || null,
-    name: opts.item ? opts.item.name : opts.name,
-    part: opts.item ? opts.item.part : opts.part || "",
-    vals: { kg: src.kg, reps: src.reps, sets: src.sets, rest: src.rest },
-    last: opts.last || (opts.item ? library().get(key(opts.item.name)) : null) || null,
-    field: "kg",
-    seen: new Set(opts.mode === "new" ? ["kg"] : ORDER),
+    ctx: o.ctx, mode: o.mode, item: o.item || null, name, part, kind, vals,
+    last: o.last || library().get(key(name)) || null,
+    field: ORDER[kind][0],
+    seen: new Set(o.mode === "new" ? [ORDER[kind][0]] : [...ORDER.reps, ...ORDER.time]),
   };
   $("#wheel-name").textContent = W.name;
   $("#wheel-del").hidden = W.mode !== "edit";
+  $("#wheel-kind").hidden = W.mode === "edit" && W.ctx === "do" && W.item.done.length > 0;
   closeInput(false);
   showScreen("screen-wheel");
+  buildFields();
   buildTicks();
   renderWheel();
 }
+
+function buildFields() {
+  const wrap = $("#fields");
+  wrap.innerHTML = "";
+  wrap.style.gridTemplateColumns = "repeat(" + ORDER[W.kind].length + ", 1fr)";
+  ORDER[W.kind].forEach((f) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "fcell";
+    b.dataset.f = f;
+    b.innerHTML = '<span class="fl">' + t("f_" + f) + "</span><b></b>";
+    b.onclick = () => { setField(f); haptic(); };
+    wrap.appendChild(b);
+  });
+  $("#wheel-kind-use").setAttribute("href", W.kind === "time" ? "#i-timer" : "#i-weight");
+}
+
+const lastStep = () => ORDER[W.kind].indexOf(W.field) === ORDER[W.kind].length - 1;
 
 function renderWheel() {
   const f = W.field;
@@ -667,7 +955,6 @@ function renderWheel() {
   const v = W.vals[f];
 
   $("#wheel-part").textContent = W.part ? t(W.part) : t("addPart");
-
   $$(".fcell").forEach((c) => {
     const k = c.dataset.f;
     c.classList.toggle("active", k === f);
@@ -687,35 +974,30 @@ function renderWheel() {
   $("#w-lap").style.opacity = laps > 0 ? 1 : 0;
   placeOnRing($("#w-thumb"), frac);
 
-  const lastV = W.last && W.last[f];
+  const lastV = W.last && W.last.kind === W.kind ? W.last[f] : null;
   const lastDot = $("#w-last");
-  lastDot.style.display = lastV != null && (f === "kg" || f === "reps") ? "" : "none";
-  if (lastV != null) placeOnRing(lastDot, (lastV / rev) % 1 || (lastV ? 1 : 0));
+  lastDot.style.display = lastV ? "" : "none";
+  if (lastV) placeOnRing(lastDot, (lastV / rev) % 1 || 1);
 
   $("#w-value").textContent = fmtField(f, v);
-  $("#w-unit").textContent = f === "kg" && !v ? t("bw").toLowerCase() : f === "kg" ? "kg" : t(cfg.unit === "rest" ? "restWord" : cfg.unit);
+  $("#w-unit").textContent = f === "kg" && !v ? t("bw") : t("f_" + f);
 
   // the note under the number: how this compares to last time
   let note = "";
   let beat = false;
-  if (f === "kg" && W.last) {
-    if (W.last.best && v > W.last.best) { note = t("best"); beat = true; }
-    else if (v > W.last.kg) { note = t("plusKg", fmtKg(v - W.last.kg)); beat = true; }
-    else if (v === W.last.kg) note = t("same");
-    else note = W.last.kg ? t("lastKg", fmtKg(W.last.kg)) : t("lastReps", fmtKg(0));
-  } else if (f === "reps" && W.last) {
-    if (v > W.last.reps) { note = t("plusReps", v - W.last.reps); beat = true; }
-    else note = v === W.last.reps ? t("same") : t("lastReps", W.last.reps);
+  if (lastV != null && ["kg", "reps", "time", "km", "level"].includes(f)) {
+    if (f === "kg" && W.last.best && v > W.last.best) { note = t("best"); beat = true; }
+    else if (v > lastV) { note = t("plus", f === "time" ? fmtDur(v - lastV) : num(v - lastV)); beat = true; }
+    else if (v === lastV) note = t("same");
+    else note = t("last", fmtField(f, lastV));
   }
   $("#w-note").textContent = note;
   $("#wheel").classList.toggle("beat", beat);
 
   renderPresets();
-
-  const go = $("#wheel-go");
-  if (W.mode === "edit") go.textContent = t("save");
-  else if (W.mode === "new" && ORDER.indexOf(f) < ORDER.length - 1) go.textContent = t("next");
-  else go.textContent = state.active ? t("addTo") : t("startWith");
+  const goNext = W.mode === "new" && !lastStep();
+  $("#wheel-go-use").setAttribute("href", goNext ? "#i-next" : "#i-check");
+  $("#wheel-go").setAttribute("aria-label", goNext ? t("next") : t("save"));
 }
 
 function placeOnRing(el, frac) {
@@ -727,14 +1009,13 @@ function placeOnRing(el, frac) {
 // One small tick per step, like detents on a click wheel.
 function buildTicks() {
   const per = FIELDS[W.field].per;
-  const g = $("#w-ticks");
   let html = "";
   for (let i = 0; i < per; i++) {
     const a = (i / per) * 2 * Math.PI - Math.PI / 2;
     const c = Math.cos(a), s = Math.sin(a);
     html += '<line class="w-tick" x1="' + (150 + 100 * c) + '" y1="' + (150 + 100 * s) + '" x2="' + (150 + 106 * c) + '" y2="' + (150 + 106 * s) + '"/>';
   }
-  g.innerHTML = html;
+  $("#w-ticks").innerHTML = html;
 }
 
 function renderPresets() {
@@ -749,16 +1030,16 @@ function renderPresets() {
     b.textContent = label;
     b.onclick = () => {
       setVal(val, true);
-      if (advance && W.mode === "new" && ORDER.indexOf(f) < ORDER.length - 1) setTimeout(nextField, 140);
+      if (advance && W.mode === "new" && !lastStep()) setTimeout(nextField, 140);
     };
     wrap.appendChild(b);
   };
   if (f === "kg") {
     chip("−5", Math.max(0, v - 5), "nudge");
-    chip("−" + fmtKg(2.5), Math.max(0, v - 2.5), "nudge");
-    if (W.last && W.last.kg !== v) chip(t("lastChip", fmtKg(W.last.kg)), W.last.kg, "");
+    chip("−" + num(2.5), Math.max(0, v - 2.5), "nudge");
+    if (W.last && W.last.kind === "reps" && W.last.kg !== v) chip(t("lastChip", fmtKg(W.last.kg)), W.last.kg, "");
     else chip(t("bwShort"), 0, "");
-    chip("+" + fmtKg(2.5), v + 2.5, "nudge");
+    chip("+" + num(2.5), v + 2.5, "nudge");
     chip("+5", v + 5, "nudge");
   } else {
     PRESETS[f].forEach((p) => chip(fmtField(f, p), p, "", true));
@@ -785,11 +1066,10 @@ function setField(f) {
 }
 
 function nextField() {
-  const i = ORDER.indexOf(W.field);
-  if (i < ORDER.length - 1) { setField(ORDER[i + 1]); haptic(); }
+  const o = ORDER[W.kind];
+  const i = o.indexOf(W.field);
+  if (i < o.length - 1) { setField(o[i + 1]); haptic(); }
 }
-
-$$(".fcell").forEach((c) => (c.onclick = () => { setField(c.dataset.f); haptic(); }));
 
 $("#wheel-part").onclick = () => {
   // tap the tag to cycle the body part
@@ -799,43 +1079,68 @@ $("#wheel-part").onclick = () => {
   renderWheel();
 };
 
+$("#wheel-kind").onclick = () => {
+  // reps ↔ time
+  W.kind = W.kind === "time" ? "reps" : "time";
+  W.field = ORDER[W.kind][0];
+  W.seen.add(W.field);
+  haptic();
+  buildFields();
+  buildTicks();
+  renderWheel();
+};
+
 $("#wheel-go").onclick = () => {
   closeInput(true);
-  if (W.mode === "new" && ORDER.indexOf(W.field) < ORDER.length - 1) return nextField();
+  if (W.mode === "new" && !lastStep()) return nextField();
   commitWheel();
 };
 
-$("#wheel-back").onclick = () => {
+function leaveWheel() {
   closeInput(false);
-  if (W.mode === "edit") { showScreen("screen-home"); renderHome(); }
-  else openPick();
-};
+  if (W.ctx === "do") { showScreen("screen-do"); renderDo(); }
+  else if (W.mode === "edit") openPlan(planId);
+  else openPick(W.ctx);
+}
+$("#wheel-back").onclick = leaveWheel;
 
 $("#wheel-del").onclick = () => {
   const snap = snapshot();
-  state.active.items = state.active.items.filter((it) => it !== W.item);
+  if (W.ctx === "do") {
+    const a = state.active;
+    const i = a.items.indexOf(W.item);
+    a.items.splice(i, 1);
+    if (!a.items.length) state.active = null;
+    else a.idx = Math.min(a.idx, a.items.length - 1);
+  } else {
+    plan().items = plan().items.filter((it) => it !== W.item);
+  }
   save();
-  showScreen("screen-home");
-  renderHome();
-  toast(t("removed", W.name), false, { label: t("undo"), fn: () => restore(snap) });
+  const name = W.name;
+  if (W.ctx === "do" && state.active) { showScreen("screen-do"); renderDo(); }
+  else if (W.ctx === "do") { showScreen("screen-home"); renderHome(); }
+  else openPlan(planId);
+  toast(t("removed", name), false, { label: t("undo"), fn: () => restore(snap) });
 };
 
 function commitWheel() {
-  const v = W.vals;
+  const v = { ...W.vals, name: W.name, part: W.part, kind: W.kind };
+  if (W.kind === "time") v.sets = 1;
   if (W.mode === "edit") {
-    Object.assign(W.item, { part: W.part, kg: v.kg, reps: v.reps, sets: v.sets, rest: v.rest });
-    save();
-    showScreen("screen-home");
-    renderHome();
-    return;
+    Object.assign(W.item, normItem({ ...v, id: W.item.id }));
+    if (W.ctx === "do") W.item._over = false;
+  } else if (W.ctx === "do") {
+    state.active.items.push({ ...normItem(v), done: [], run: null });
+  } else {
+    const tr = plan();
+    tr.items.push(normItem(v));
+    autoName(tr);
   }
-  if (!state.active) startWorkout([], "");
-  state.active.items.push({ id: uid(), name: W.name, part: W.part, kg: v.kg, reps: v.reps, sets: v.sets, rest: v.rest, done: [] });
   if (W.part) pickPart = W.part;
   save();
-  showScreen("screen-home");
-  renderHome();
-  toast(t("added", W.name));
+  if (W.ctx === "do") { showScreen("screen-do"); renderDo(); }
+  else openPlan(planId);
+  if (W.mode !== "edit") toast(t("added", W.name));
 }
 
 /* turning: the angle your finger moves around the centre becomes steps */
@@ -846,14 +1151,13 @@ function commitWheel() {
   const angleAt = (e) => {
     const r = el.querySelector("svg").getBoundingClientRect();
     const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-    return { a: (Math.atan2(e.clientY - cy, e.clientX - cx) * 180) / Math.PI, d: Math.hypot(e.clientX - cx, e.clientY - cy), r: r.width / 2 };
+    return (Math.atan2(e.clientY - cy, e.clientX - cx) * 180) / Math.PI;
   };
 
   el.addEventListener("pointerdown", (e) => {
     // the middle is for typing; everything around it turns
     if (!W || !$("#w-input").hidden || e.target.closest("#w-center")) return;
-    const p = angleAt(e);
-    drag = { id: e.pointerId, last: p.a, acc: 0 };
+    drag = { id: e.pointerId, last: angleAt(e), acc: 0 };
     el.setPointerCapture(e.pointerId);
     el.classList.add("turning");
     e.preventDefault();
@@ -861,7 +1165,7 @@ function commitWheel() {
 
   el.addEventListener("pointermove", (e) => {
     if (!drag || e.pointerId !== drag.id) return;
-    const a = angleAt(e).a;
+    const a = angleAt(e);
     let d = a - drag.last;
     if (d > 180) d -= 360;
     if (d < -180) d += 360;
@@ -889,9 +1193,10 @@ function commitWheel() {
 $("#w-center").onclick = () => {
   const inp = $("#w-input");
   const f = W.field;
-  inp.value = f === "kg" && !W.vals.kg ? "" : fmtField(f, W.vals[f]);
-  inp.placeholder = f === "kg" ? "kg" : f === "rest" ? "sec" : "";
-  inp.inputMode = f === "kg" ? "decimal" : "numeric";
+  const v = W.vals[f];
+  inp.value = (f === "kg" || f === "km" || f === "level") && !v ? "" : fmtField(f, v);
+  inp.placeholder = f === "rest" || f === "time" ? "m:ss" : t("f_" + f);
+  inp.inputMode = f === "kg" || f === "km" ? "decimal" : f === "rest" || f === "time" ? "text" : "numeric";
   inp.hidden = false;
   inp.focus();
   inp.select();
@@ -899,18 +1204,19 @@ $("#w-center").onclick = () => {
 
 function parseTyped(f, s) {
   s = String(s).trim().replace(",", ".");
-  if (!s) return f === "kg" ? 0 : null;
-  if (f === "rest") {
+  if (!s) return f === "kg" || f === "km" || f === "level" ? 0 : null;
+  if (f === "rest" || f === "time") {
     if (s.includes(":")) {
-      const [m, sec] = s.split(":");
-      return (parseInt(m, 10) || 0) * 60 + (parseInt(sec, 10) || 0);
+      const p = s.split(":").map((x) => parseInt(x, 10) || 0);
+      return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p[0] * 60 + p[1];
     }
     const n = parseFloat(s);
     if (isNaN(n)) return null;
-    return n < 10 ? Math.round(n * 60) : Math.round(n); // "2" means 2 minutes
+    // a small number means minutes ("2" = 2 min), a big one seconds
+    return f === "time" ? (n <= 300 ? Math.round(n * 60) : Math.round(n)) : n < 10 ? Math.round(n * 60) : Math.round(n);
   }
   const n = parseFloat(s);
-  return isNaN(n) ? null : f === "kg" ? n : Math.round(n);
+  return isNaN(n) ? null : f === "kg" || f === "km" ? n : Math.round(n);
 }
 
 function closeInput(apply) {
@@ -934,84 +1240,19 @@ $("#w-input").addEventListener("keydown", (e) => {
 $("#w-input").addEventListener("blur", () => closeInput(true));
 
 /* ------------------------------------------------------------------ */
-/*  Finish, trainings                                                  */
-/* ------------------------------------------------------------------ */
-function workoutStats(w) {
-  let sets = 0, volume = 0;
-  w.items.forEach((it) => it.done.forEach((d) => { sets++; volume += (d.kg || 0) * (d.reps || 0); }));
-  const exercises = w.items.filter((it) => it.done.length).length;
-  return { sets, volume, exercises, ms: (w.end || Date.now()) - w.start };
-}
-
-let lastFinished = null;
-
-$("#finish").onclick = () => {
-  const a = state.active;
-  const st = workoutStats(a);
-  const snap = snapshot();
-  a.rest = null;
-  if (!st.sets) {
-    state.active = null;
-    save(); renderHome();
-    toast(t("discarded"), false, { label: t("undo"), fn: () => restore(snap) });
-    return;
-  }
-  a.end = Date.now();
-  delete a.rest;
-  state.workouts.push(a);
-  state.active = null;
-  save();
-  lastFinished = a;
-  keepAwake();
-  $("#done-stats").innerHTML =
-    '<div class="stat"><b>' + fmtMins(st.ms) + "</b><span>" + t("sTime") + "</span></div>" +
-    '<div class="stat"><b>' + st.sets + "</b><span>" + t("sSets") + "</span></div>" +
-    '<div class="stat"><b>' + fmtVolume(st.volume) + "</b><span>" + t("sLifted") + "</span></div>";
-  $("#done-tpl").hidden = state.templates.some((t) => a.name && t.name === a.name);
-  showScreen("screen-done");
-};
-
-$("#done-ok").onclick = () => { showScreen("screen-home"); renderHome(); };
-$("#done-tpl").onclick = () => askName(lastFinished, () => { $("#done-tpl").hidden = true; });
-$("#save-tpl").onclick = () => askName(state.active);
-
-function guessName(w) {
-  const parts = [];
-  w.items.forEach((it) => { if (it.part && parts.indexOf(it.part) < 0) parts.push(it.part); });
-  return parts.slice(0, 3).map(partName).join(" + ");
-}
-
-// "Save as training": a name sheet, then the exercises are stored (values included).
-let sheetFn = null;
-function askName(w, after) {
-  if (!w || !w.items.length) return;
-  const inp = $("#sheet-input");
-  inp.value = w.name || guessName(w);
-  $("#sheet").hidden = false;
-  sheetFn = () => {
-    const name = inp.value.trim();
-    if (!name) return;
-    const items = w.items.map((it) => ({ name: it.name, part: it.part, kg: it.kg, reps: it.reps, sets: it.sets, rest: it.rest }));
-    const existing = state.templates.find((t) => key(t.name) === key(name));
-    if (existing) existing.items = items;
-    else state.templates.push({ id: uid(), name, items });
-    w.name = name;
-    save();
-    closeSheet();
-    toast(t(existing ? "tplUpdated" : "tplSaved", name));
-    if (after) after();
-  };
-  setTimeout(() => { inp.focus(); inp.select(); }, 50);
-}
-function closeSheet() { $("#sheet").hidden = true; $("#sheet-input").blur(); sheetFn = null; }
-$("#sheet-ok").onclick = () => sheetFn && sheetFn();
-$("#sheet-cancel").onclick = closeSheet;
-$("#sheet").onclick = (e) => { if (e.target.id === "sheet") closeSheet(); };
-$("#sheet-input").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); sheetFn && sheetFn(); } });
-
-/* ------------------------------------------------------------------ */
 /*  History                                                            */
 /* ------------------------------------------------------------------ */
+function doneLine(it) {
+  if (it.kind === "time") {
+    const d = it.done[0];
+    return ic("timer", "xs") + fmtDur(d.time) + (d.km ? " · " + num(d.km) + " km" : "") + (d.level ? " · L" + d.level : "");
+  }
+  const top = Math.max(...it.done.map((x) => x.kg || 0));
+  const reps = it.done.map((x) => x.reps);
+  const same = reps.every((r) => r === reps[0]);
+  return (same ? it.done.length + "×" + reps[0] : reps.join("/")) + (top ? " · " + fmtKg(top) + " kg" : "");
+}
+
 function renderHistory() {
   const wrap = $("#hist-list");
   wrap.innerHTML = "";
@@ -1033,32 +1274,30 @@ function renderHistory() {
     const st = workoutStats(w);
     const el = document.createElement("div");
     el.className = "hw";
-    const lines = w.items.filter((it) => it.done.length).map((it) => {
-      const top = Math.max(...it.done.map((x) => x.kg || 0));
-      const reps = it.done.map((x) => x.reps);
-      const same = reps.every((r) => r === reps[0]);
-      return '<div class="hw-ex"><span>' + escapeHtml(it.name) + "</span><span>" +
-        (same ? it.done.length + " × " + reps[0] : reps.join(" / ")) + (top ? " · " + fmtKg(top) + " kg" : "") + "</span></div>";
-    }).join("");
     el.innerHTML =
       '<div class="hw-top"><span class="hw-date">' +
-      escapeHtml(d.toLocaleDateString(t("locale"), { weekday: "short", day: "numeric", month: "short" }) + (w.name ? " · " + w.name : "")) +
-      '</span><span class="hw-meta">' + fmtMins(st.ms) + " · " + st.sets + " " + t("sets") + " · " + fmtVolume(st.volume) + "</span></div>" +
-      lines +
-      '<div class="hw-acts"><button class="pill rep" type="button">' + ic("again") + "<span>" + t("again") + "</span></button>" +
-      '<button class="pill tpl-b" type="button">' + ic("star") + "<span>" + t("tplShort") + "</span></button>" +
-      '<button class="pill del" type="button" aria-label="' + t("del") + '">' + ic("trash") + "</button></div>";
+      escapeHtml(d.toLocaleDateString(t("locale"), { weekday: "short", day: "numeric", month: "short" })) +
+      (w.name ? ' <span class="hw-name">' + escapeHtml(w.name) + "</span>" : "") +
+      '</span><span class="hw-meta">' + statsHtml(st) + "</span></div>" +
+      w.items.filter((it) => it.done.length).map((it) =>
+        '<div class="hw-ex"><span>' + escapeHtml(it.name) + "</span><span>" + doneLine(it) + "</span></div>").join("") +
+      '<div class="hw-acts"><button class="mini-btn rep" type="button" aria-label="' + t("start") + '">' + ic("again") + "</button>" +
+      '<button class="mini-btn del" type="button" aria-label="' + t("del") + '">' + ic("trash") + "</button></div>";
     el.querySelector(".rep").onclick = () => {
       if (state.active) { toast(t("finishFirst"), true); return; }
-      startWorkout(w.items, w.name);
-      showScreen("screen-home");
+      // do it again: its training if it still exists, else a new one from it
+      let tr = state.trainings.find((x) => x.id === w.trainingId);
+      if (!tr) {
+        tr = { id: uid(), name: w.name || t("training"), auto: false, items: w.items.map((it) => normItem({ ...it, id: undefined })) };
+        state.trainings.push(tr);
+      }
+      startTraining(tr.id);
     };
-    el.querySelector(".tpl-b").onclick = () => askName(w);
     el.querySelector(".del").onclick = () => {
       const snap = snapshot();
       state.workouts = state.workouts.filter((x) => x !== w);
       save(); renderHistory();
-      toast(t("wDeleted"), false, { label: t("undo"), fn: () => { restore(snap); renderHistory(); } });
+      toast(t("wDeleted"), false, { label: t("undo"), fn: () => restore(snap) });
     };
     wrap.appendChild(el);
   });
@@ -1090,11 +1329,10 @@ $("#import-file").onchange = async (e) => {
   if (!file) return;
   try {
     const v = JSON.parse(await file.text());
-    if (!v || !Array.isArray(v.workouts) || !Array.isArray(v.templates)) throw new Error("bad");
+    if (!v || !Array.isArray(v.workouts)) throw new Error("bad");
     if (!confirm(t("replace", v.workouts.length))) return;
     const snap = snapshot();
-    const b = blank();
-    state = { ...b, ...v, settings: { ...b.settings, ...(v.settings || {}) } };
+    state = migrate(v);
     save();
     applyLang();
     toast(t("imported"), false, { label: t("undo"), fn: () => restore(snap) });
@@ -1116,8 +1354,6 @@ $("#wipe").onclick = () => {
 /* ------------------------------------------------------------------ */
 /*  Navigation                                                         */
 /* ------------------------------------------------------------------ */
-$("#start-empty").onclick = () => startWorkout([], "");
-$("#add-ex").onclick = openPick;
 $("#go-history").onclick = () => { renderHistory(); showScreen("screen-history"); };
 $("#hist-back").onclick = () => { showScreen("screen-home"); renderHome(); };
 $("#go-settings").onclick = () => { renderSettings(); showScreen("screen-settings"); };
@@ -1141,9 +1377,11 @@ function applyLang() {
   $("#lang").setAttribute("aria-label", t("langSwitch"));
   // whatever is on screen re-renders in the new language
   renderHome();
-  if ($("#screen-pick").classList.contains("active")) { renderParts(); renderSuggest(); }
-  if ($("#screen-wheel").classList.contains("active") && W) renderWheel();
-  if ($("#screen-history").classList.contains("active")) renderHistory();
+  if (onScreen("screen-pick")) { renderParts(); renderSuggest(); }
+  if (onScreen("screen-wheel") && W) { buildFields(); renderWheel(); }
+  if (onScreen("screen-plan") && plan()) renderPlan();
+  if (onScreen("screen-do") && state.active) renderDo();
+  if (onScreen("screen-history")) renderHistory();
 }
 
 $("#lang").onclick = () => {
@@ -1160,7 +1398,11 @@ $("#lang").onclick = () => {
 /* ------------------------------------------------------------------ */
 /*  Boot                                                               */
 /* ------------------------------------------------------------------ */
+save(); // stores the migrated shape
 applyLang();
+// a workout left running opens straight on it
+if (state.active) { showScreen("screen-do"); renderDo(); }
+keepAwake();
 // ask the browser not to clear our data when space runs low
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 if ("serviceWorker" in navigator) {
