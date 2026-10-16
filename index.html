@@ -38,20 +38,15 @@
       <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
       <symbol id="i-timer" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13.5" r="7"/><path d="M12 13.5V10M10 3h4"/></g></symbol>
       <symbol id="i-weight" viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
-      <symbol id="flag-fr" viewBox="0 0 30 30"><clipPath id="cf"><circle cx="15" cy="15" r="15"/></clipPath><g clip-path="url(#cf)"><rect width="10" height="30" fill="#0055a4"/><rect x="10" width="10" height="30" fill="#fff"/><rect x="20" width="10" height="30" fill="#ef4135"/></g></symbol>
-      <symbol id="flag-en" viewBox="0 0 30 30"><clipPath id="ce"><circle cx="15" cy="15" r="15"/></clipPath><g clip-path="url(#ce)"><rect width="30" height="30" fill="#012169"/><path d="M0 0l30 30M30 0L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l30 30M30 0L0 30" stroke="#c8102e" stroke-width="2"/><path d="M15 0v30M0 15h30" stroke="#fff" stroke-width="10"/><path d="M15 0v30M0 15h30" stroke="#c8102e" stroke-width="6"/></g></symbol>
     </defs>
   </svg>
 
   <!-- Home: your trainings -->
   <section id="screen-home" class="screen active">
-    <header class="topbar wide">
+    <header class="topbar">
       <button id="go-history" class="icon-btn" data-i18n-aria="history"><svg class="ic"><use href="#i-chart"/></svg></button>
       <span class="progress" data-i18n="gym"></span>
-      <span class="side">
-        <button id="lang" class="icon-btn lang" type="button"><svg class="flag" aria-hidden="true"><use id="lang-use" href="#flag-en"/></svg></button>
-        <button id="go-settings" class="icon-btn" data-i18n-aria="settings"><svg class="ic"><use href="#i-sliders"/></svg></button>
-      </span>
+      <button id="go-settings" class="icon-btn" data-i18n-aria="settings"><svg class="ic"><use href="#i-sliders"/></svg></button>
     </header>
     <div class="scroll">
       <button id="resume" class="resume" type="button" hidden>
@@ -59,7 +54,7 @@
         <span class="resume-main"><b id="resume-name"></b><span id="resume-clock"></span></span>
       </button>
       <div id="tr-list" class="card-list"></div>
-      <button id="new-tr" class="add-card" type="button" data-i18n-aria="newTr"><svg class="ic"><use href="#i-plus"/></svg></button>
+      <button id="new-tr" class="add-card" type="button"><svg class="ic"><use href="#i-plus"/></svg><span class="add-lbl" data-i18n="newTr"></span></button>
     </div>
   </section>
 
@@ -72,7 +67,7 @@
     </header>
     <div class="scroll">
       <div id="plan-list" class="card-list"></div>
-      <button id="plan-add" class="add-card" type="button" data-i18n-aria="addEx"><svg class="ic"><use href="#i-plus"/></svg></button>
+      <button id="plan-add" class="add-card" type="button"><svg class="ic"><use href="#i-plus"/></svg><span class="add-lbl" data-i18n="addEx"></span></button>
     </div>
     <div class="bottom-bar">
       <button id="plan-start" class="btn primary wide icon-only" type="button" data-i18n-aria="start"><svg class="ic lg"><use href="#i-play"/></svg></button>
@@ -141,14 +136,24 @@
 
   <!-- Do: one exercise at a time, full screen -->
   <section id="screen-do" class="screen">
-    <header class="topbar wide">
+    <header class="topbar">
       <button id="do-min" class="icon-btn" data-i18n-aria="minimize"><svg class="ic"><use href="#i-down"/></svg></button>
-      <div id="do-steps" class="steps"></div>
-      <span class="side">
-        <span id="do-clock" class="mini-clock"></span>
-        <button id="do-list" class="icon-btn" data-i18n-aria="overview"><svg class="ic"><use href="#i-list"/></svg></button>
-      </span>
+      <span id="do-clock" class="do-clock"></span>
+      <button id="do-list" class="icon-btn" data-i18n-aria="overview"><svg class="ic"><use href="#i-list"/></svg></button>
     </header>
+    <!-- the session so far: exercise / rest blocks, to scale -->
+    <div id="do-line" class="timeline"></div>
+
+    <!-- next exercise: one big tap to start it -->
+    <div id="do-ready" class="do-ready" hidden>
+      <div class="do-head">
+        <div id="ready-count" class="ready-count"></div>
+        <div id="ready-name" class="do-name"></div>
+        <span id="ready-part" class="part-tag"></span>
+      </div>
+      <button id="ready-spec" class="ready-spec" type="button" data-i18n-aria="edit"></button>
+      <button id="ready-go" class="do-main go" type="button" data-i18n-aria="start"><svg class="ic xl"><use href="#i-play"/></svg></button>
+    </div>
 
     <!-- the exercise -->
     <div id="do-ex" class="do-ex">
@@ -185,6 +190,7 @@
     <div id="do-end" class="do-end" hidden>
       <div class="check"><svg class="ic big"><use href="#i-check"/></svg></div>
       <div id="do-stats" class="done-stats"></div>
+      <div id="do-split" class="split"></div>
       <button id="do-finish" class="btn primary wide" type="button" data-i18n="finish"></button>
     </div>
   </section>
@@ -196,6 +202,18 @@
       <div class="row">
         <button id="over-add" class="btn grow icon-only" type="button" data-i18n-aria="addEx"><svg class="ic"><use href="#i-plus"/></svg></button>
         <button id="over-finish" class="btn grow finish-btn" type="button" data-i18n="finish"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Finish: today's extras / removals, keep them in the plan? -->
+  <div id="sheet-keep" class="sheet" hidden>
+    <div class="sheet-card">
+      <div id="keep-q" class="sheet-q"></div>
+      <div id="keep-list" class="keep-list"></div>
+      <div class="row">
+        <button id="keep-no" class="btn grow" type="button" data-i18n="keepNo"></button>
+        <button id="keep-yes" class="btn primary grow" type="button" data-i18n="keepYes"></button>
       </div>
     </div>
   </div>
@@ -218,6 +236,14 @@
       <span></span>
     </header>
     <div class="scroll">
+      <div id="opt-lang" class="seg">
+        <button type="button" data-v="en"><span class="flag"><svg viewBox="0 0 60 30" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><clipPath id="uk-t"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><rect width="60" height="30" fill="#012169"/><path d="M0 0l60 30M60 0L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30M60 0L0 30" clip-path="url(#uk-t)" stroke="#c8102e" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#c8102e" stroke-width="6"/></svg></span>English</button>
+        <button type="button" data-v="fr"><span class="flag"><svg viewBox="0 0 3 3" preserveAspectRatio="none" aria-hidden="true"><rect width="1" height="3" fill="#0055a4"/><rect x="1" width="1" height="3" fill="#fff"/><rect x="2" width="1" height="3" fill="#ef4135"/></svg></span>Français</button>
+      </div>
+      <div id="opt-unit" class="seg">
+        <button type="button" data-v="kg">kg</button>
+        <button type="button" data-v="lb">lb</button>
+      </div>
       <button id="opt-sound" class="opt" type="button"><span data-i18n="sound"></span><i class="tog"></i></button>
       <button id="opt-awake" class="opt" type="button"><span data-i18n="awake"></span><i class="tog"></i></button>
       <p class="hint small-hint" data-i18n="dataHint"></p>
