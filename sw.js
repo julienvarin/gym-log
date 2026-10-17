@@ -1,6 +1,6 @@
 /* Simple network-first service worker for the app shell.
    Bump CACHE when you change cached assets to force an update. */
-const CACHE = "gymlog-v7";
+const CACHE = "gymlog-v8";
 const ASSETS = [
   "./",
   "index.html",
