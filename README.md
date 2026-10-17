@@ -5,14 +5,22 @@ GitHub Pages, in the same style as [Saver](https://github.com/julienvarin/saver)
 
 **Two modes.**
 
-- **Plan** — Home lists your trainings. Tap **+** for a new one, or tap a training to edit it:
+Home has one switch at the top: **Train** or **Plan**.
+
+- **Plan** — your trainings, each with ✎ to edit it. **+ Plan a training** makes a new one:
   add exercises and set each one on the wheel. Nothing is timed while you plan.
-- **Do** — Tap **▶** on a training. A big session clock sits on top, with a timeline under it
+- **Train** — tap a training to start it. The one you've gone longest without doing sits
+  on top, marked *Up next*. While a workout runs, home shows only that workout.
+- **Do** — once started: A big session clock sits on top, with a timeline under it
   that splits the session into blocks: each exercise, each rest, to scale. Every exercise
   starts on its own screen — name, weight × reps, sets — and one big **▶**. Each ✓ ticks a set
   and turns the screen into the rest countdown (−15 / skip / +15), which beeps and hands back.
-  After the last set you rest, then tap ▶ for the next exercise. Swipe left / right to jump;
-  ☰ lists every exercise, adds one, or finishes. **⌄** goes back to your trainings while the
+  After the last set you rest, then tap ▶ for the next exercise. Three round buttons sit at
+  the bottom of every screen: blue ⇅ **do it later** (machine taken: the next one comes first),
+  amber ⏭ **skip** this exercise, red ■ **end now** (the rest is skipped, you land on the
+  summary; Undo brings it back). Swipe left / right to jump; ☰ lists every exercise — tap one
+  to do it now (it moves up in the order) — adds one you forgot, or finishes. Weights read
+  reps first: **10 × 20 kg**. **⌄** goes back to your trainings while the
   workout keeps running (a green bar brings you back). The end screen shows how long each
   exercise took.
 - **Changes on the day.** An exercise you add during a workout is marked **+** and kept in the
