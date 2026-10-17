@@ -89,6 +89,7 @@ const STR = {
     replace: (n) => "Replace what's on this phone with this backup (" + n + " workouts)?",
     imported: "Backup imported", badBackup: "That isn't a Gym Log backup",
     wipeQ: "Erase every workout and training on this phone?", erased: "Erased", saveFail: "Couldn't save on this phone",
+    total: "total", nEx: (n) => (n > 1 ? "exercises" : "exercise"),
     setOf: (i, n) => "Set " + i + "/" + n, nOfM: (i, n) => i + " / " + n, nSets: (n) => n + (n > 1 ? " sets" : " set"),
     keepQ: (n) => "Update “" + n + "” with today's changes?", keepYes: "Update plan", keepNo: "Just today",
     train: "Train", planMode: "Plan", planTr: "Plan a training", upNext: "Up next",
@@ -117,6 +118,7 @@ const STR = {
     replace: (n) => "Remplacer les données de ce téléphone par cette sauvegarde (" + n + " séances)" + NB + "?",
     imported: "Sauvegarde importée", badBackup: "Ce n'est pas une sauvegarde Gym Log",
     wipeQ: "Effacer toutes les séances et entraînements de ce téléphone" + NB + "?", erased: "Effacé", saveFail: "Impossible d'enregistrer sur ce téléphone",
+    total: "au total", nEx: (n) => (n > 1 ? "exercices" : "exercice"),
     setOf: (i, n) => "Série " + i + "/" + n, nOfM: (i, n) => i + " / " + n, nSets: (n) => n + (n > 1 ? " séries" : " série"),
     keepQ: (n) => "Mettre à jour « " + n + " » avec les changements du jour" + NB + "?", keepYes: "Mettre à jour", keepNo: "Juste aujourd'hui",
     train: "S'entraîner", planMode: "Planifier", planTr: "Planifier un entraînement", upNext: "À suivre",
@@ -351,10 +353,6 @@ function fmtDur(s) {
 function fmtMins(ms) {
   const m = Math.round(ms / 60000);
   return m < 60 ? m + " min" : Math.floor(m / 60) + "h" + String(m % 60).padStart(2, "0");
-}
-function fmtVolume(kg) {
-  if (unit() === "lb") { const lb = kg / LB; return lb >= 10000 ? num(Math.round(lb / 100) / 10) + "k lb" : Math.round(lb) + " lb"; }
-  return kg >= 1000 ? num(Math.round(kg / 100) / 10) + " t" : Math.round(kg) + " kg";
 }
 // a wheel value, already in your unit
 function fmtField(f, v) {
@@ -617,12 +615,18 @@ function lineHtml(w) {
   }).join("");
 }
 
-// Active time per exercise id, from the "ex" blocks (older ones point by index).
+// Time on each exercise (by id): from starting it to its last set, rests between
+// its sets included. (Older workouts point at exercises by index.)
 function exTimes(w) {
-  const t = new Map();
+  const from = new Map();
   (w.segs || []).forEach((g) => {
     const id = g.id || (w.items[g.i] && w.items[g.i].id);
-    if (g.k === "ex") t.set(id, (t.get(id) || 0) + ((g.t1 || w.end || Date.now()) - g.t0));
+    if (g.k === "ex" && !from.has(id)) from.set(id, g.t0);
+  });
+  const t = new Map();
+  w.items.forEach((it) => {
+    const t1 = Math.max(0, ...it.done.map((d) => d.at || 0));
+    if (from.has(it.id) && t1 > from.get(it.id)) t.set(it.id, t1 - from.get(it.id));
   });
   return t;
 }
@@ -738,17 +742,18 @@ function renderEnd() {
   $("#do-split").innerHTML = splitHtml(a);
 }
 
+// Two numbers: how long, and how many exercises you did.
 function statsHtml(st) {
-  return '<div class="stat">' + ic("timer") + "<b>" + fmtMins(st.ms) + "</b></div>" +
-    '<div class="stat">' + ic("check") + "<b>" + st.sets + "</b></div>" +
-    (st.volume ? '<div class="stat">' + ic("weight") + "<b>" + fmtVolume(st.volume) + "</b></div>" : "");
+  return '<div class="stat"><b>' + fmtMins(st.ms) + "</b><small>" + t("total") + "</small></div>" +
+    '<div class="stat"><b>' + st.exercises + "</b><small>" + t("nEx", st.exercises) + "</small></div>";
 }
 
-// Each exercise and how long it took.
+// Each exercise you did: what you did, and how long it took.
 function splitHtml(w) {
   const times = exTimes(w);
   return w.items.map((it) => !it.done.length ? "" :
-    '<div class="sp-row"><span>' + escapeHtml(it.name) + (it.extra ? ' <i class="plus-tag">+</i>' : "") + "</span><span>" +
+    '<div class="sp-row"><span class="sp-main"><span class="sp-name">' + escapeHtml(it.name) + (it.extra ? ' <i class="plus-tag">+</i>' : "") +
+    '</span><span class="sp-did">' + doneLine(it) + '</span></span><span class="sp-time">' +
     (times.get(it.id) ? fmtDur(times.get(it.id) / 1000) : "") + "</span></div>").join("");
 }
 
@@ -950,9 +955,9 @@ $("#over-finish").onclick = () => { closeOver(); finishWorkout(); };
 $("#do-finish").onclick = finishWorkout;
 
 function workoutStats(w) {
-  let sets = 0, volume = 0;
-  w.items.forEach((it) => it.done.forEach((d) => { sets++; volume += (d.kg || 0) * (d.reps || 0); }));
-  return { sets, volume, ms: (w.end || Date.now()) - w.start };
+  let sets = 0;
+  w.items.forEach((it) => { sets += it.done.length; });
+  return { sets, exercises: w.items.filter((it) => it.done.length).length, ms: (w.end || Date.now()) - w.start };
 }
 
 function finishWorkout() {
@@ -1542,8 +1547,7 @@ function renderHistory() {
       (w.name ? ' <span class="hw-name">' + escapeHtml(w.name) + "</span>" : "") +
       '</span><span class="hw-meta">' + statsHtml(st) + "</span></div>" +
       (w.segs && w.segs.length ? '<div class="timeline small">' + lineHtml(w) + "</div>" : "") +
-      w.items.filter((it) => it.done.length).map((it) =>
-        '<div class="hw-ex"><span>' + escapeHtml(it.name) + (it.extra ? ' <i class="plus-tag">+</i>' : "") + "</span><span>" + doneLine(it) + "</span></div>").join("") +
+      '<div class="split">' + splitHtml(w) + "</div>" +
       '<div class="hw-acts"><button class="mini-btn rep" type="button" aria-label="' + t("start") + '">' + ic("again") + "</button>" +
       '<button class="mini-btn del" type="button" aria-label="' + t("del") + '">' + ic("trash") + "</button></div>";
     el.querySelector(".rep").onclick = () => {
