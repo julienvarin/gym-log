@@ -10,6 +10,7 @@
   --done: #34d399;
   --warn: #fbbf24;
   --danger: #f87171;
+  --info: #60a5fa;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
@@ -178,12 +179,23 @@ button.part-tag { cursor: pointer; }
 .card-list { display: flex; flex-direction: column; gap: 10px; }
 .card-list:empty { display: none; }
 .tr {
-  display: flex; align-items: center; gap: 12px;
-  background: var(--surface); border-radius: 18px; padding: 16px 12px 16px 18px;
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; cursor: pointer;
+  background: var(--surface); border: 1px solid transparent; border-radius: 18px; padding: 16px 12px 16px 18px;
 }
-.tr-main { flex: 1; min-width: 0; cursor: pointer; }
+.tr:active { transform: scale(0.99); background: var(--surface-2); }
+.tr.next { border-color: rgba(124, 108, 246, .55); padding-top: 18px; padding-bottom: 18px; }
+.tr-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.tr-badge { color: var(--accent); font-size: 12px; font-weight: 700; margin-bottom: 4px; }
 .tr-name { font-size: 18px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tr-sub { color: var(--muted); font-size: 13px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tr-edit { width: 44px; height: 44px; border-radius: 50%; background: var(--surface-2); color: var(--muted); display: grid; place-items: center; flex: 0 0 auto; }
+.tr-edit .ic { width: 20px; height: 20px; }
+
+/* Train / Plan: the two things home is for */
+.seg.mode { padding: 6px; }
+.seg.mode button { padding: 15px 8px; font-size: 17px; gap: 8px; }
+.seg.mode button .ic { width: 20px; height: 20px; }
+.seg.mode button.on { background: linear-gradient(160deg, var(--accent), var(--accent-2)); color: #fff; }
 .play {
   width: 52px; height: 52px; border-radius: 50%; border: none; flex: 0 0 auto; cursor: pointer;
   background: linear-gradient(160deg, var(--accent), var(--accent-2)); color: #fff;
@@ -211,8 +223,8 @@ button.part-tag { cursor: pointer; }
 .add-card:active { transform: scale(0.98); background: var(--surface); }
 .add-card.first { padding: 56px 20px; flex-direction: column; gap: 10px; }
 .add-card.first .ic { width: 34px; height: 34px; }
-.add-lbl { display: none; font-size: 17px; font-weight: 600; }
-.add-card.first .add-lbl { display: block; }
+.add-lbl { font-size: 17px; font-weight: 600; }
+#plan-add:not(.first) .add-lbl { display: none; }
 
 /* ---- plan ---- */
 .row-card {
@@ -397,6 +409,18 @@ button.part-tag { cursor: pointer; }
 .round-btn:active { transform: scale(0.92); }
 
 .do-end { justify-content: center; gap: 20px; }
+
+/* do it later / skip / end now: same spot on every screen, one colour each */
+.do-ready, .do-ex, .do-rest { padding-bottom: 8px; }
+.do-ctl { display: flex; justify-content: center; gap: 28px; padding: 4px 20px calc(16px + var(--safe-bottom)); flex-shrink: 0; }
+.ctl {
+  width: 58px; height: 58px; border-radius: 50%; border: none; cursor: pointer;
+  display: grid; place-items: center; transition: transform .08s ease;
+}
+.ctl:active { transform: scale(0.9); }
+.ctl.later { background: rgba(96, 165, 250, .15); color: var(--info); }
+.ctl.skip { background: rgba(251, 191, 36, .15); color: var(--warn); }
+.ctl.stop { background: rgba(248, 113, 113, .15); color: var(--danger); }
 .split { width: 100%; display: flex; flex-direction: column; gap: 2px; max-height: 30vh; overflow-y: auto; }
 .sp-row { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; padding: 7px 4px; border-bottom: 1px solid var(--surface); }
 .sp-row span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -425,6 +449,8 @@ button.part-tag { cursor: pointer; }
 }
 .over-row.cur { border-color: var(--accent); }
 .over-row.done { opacity: .5; }
+.over-row.skipped { opacity: .5; }
+.over-row.skipped .or-prog .ic { color: var(--warn); }
 .or-name { font-size: 16px; font-weight: 600; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .or-prog { color: var(--muted); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .or-prog .ic { width: 18px; height: 18px; color: var(--done); }

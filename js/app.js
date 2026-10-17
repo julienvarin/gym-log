@@ -91,6 +91,9 @@ const STR = {
     wipeQ: "Erase every workout and training on this phone?", erased: "Erased", saveFail: "Couldn't save on this phone",
     setOf: (i, n) => "Set " + i + "/" + n, nOfM: (i, n) => i + " / " + n, nSets: (n) => n + (n > 1 ? " sets" : " set"),
     keepQ: (n) => "Update “" + n + "” with today's changes?", keepYes: "Update plan", keepNo: "Just today",
+    train: "Train", planMode: "Plan", planTr: "Plan a training", upNext: "Up next",
+    later: "Do it later", skipEx: "Skip exercise", stopNow: "End now",
+    skipped: (n) => "Skipped " + n, movedLater: (n) => n + " later", endedEarly: "Ended early",
   },
   fr: {
     locale: "fr-FR", gym: "Muscu", history: "Historique", settings: "Réglages", back: "Retour", remove: "Retirer",
@@ -116,6 +119,9 @@ const STR = {
     wipeQ: "Effacer toutes les séances et entraînements de ce téléphone" + NB + "?", erased: "Effacé", saveFail: "Impossible d'enregistrer sur ce téléphone",
     setOf: (i, n) => "Série " + i + "/" + n, nOfM: (i, n) => i + " / " + n, nSets: (n) => n + (n > 1 ? " séries" : " série"),
     keepQ: (n) => "Mettre à jour « " + n + " » avec les changements du jour" + NB + "?", keepYes: "Mettre à jour", keepNo: "Juste aujourd'hui",
+    train: "S'entraîner", planMode: "Planifier", planTr: "Planifier un entraînement", upNext: "À suivre",
+    later: "Plus tard", skipEx: "Passer l'exercice", stopNow: "Terminer maintenant",
+    skipped: (n) => n + " passé", movedLater: (n) => n + " plus tard", endedEarly: "Terminée plus tôt",
   },
 };
 
@@ -129,7 +135,8 @@ const STORE = "gymlog.v1";
 // item: { id, name, part, kind, kg, reps, sets, rest, time, km, level }
 // active: the workout being done, or null. A copy of a training whose items also
 //   carry done: [{ kg, reps, at }] (reps) or [{ time, km, level, at }] (time), plus
-//   run: { acc, from } for the stopwatch of a timed exercise.
+//   run: { acc, from } for the stopwatch of a timed exercise, and skipped: true
+//   when you passed on it today.
 // workouts: finished ones, newest last.
 let state = load();
 
@@ -137,7 +144,7 @@ function blank() {
   const nl = navigator.language || "";
   const lang = /^fr/i.test(nl) ? "fr" : "en";
   const unit = /^en-(US|LR|MM)/i.test(nl) ? "lb" : "kg";
-  return { trainings: [], workouts: [], active: null, settings: { sound: true, awake: true, lang, unit } };
+  return { trainings: [], workouts: [], active: null, settings: { sound: true, awake: true, lang, unit, home: "train" } };
 }
 
 function normItem(it) {
@@ -357,17 +364,18 @@ function fmtField(f, v) {
   if (f === "level") return v ? String(v) : t("off");
   return String(v);
 }
-// The short line under an exercise name: "60 kg · 4×8 · ⏱1:30" or "⏱20:00 · 5 km · L8".
+// The short line under an exercise name: "4×8 · 60 kg · ⏱1:30" or "⏱20:00 · 5 km · L8".
 function specHtml(it) {
   if (it.kind === "time") {
     return ic("timer", "xs") + fmtDur(it.time) + (it.km ? " · " + num(it.km) + " km" : "") + (it.level ? " · L" + it.level : "");
   }
-  return (it.kg ? fmtKg(it.kg) + " " + unit() : t("bwShort")) + " · " + it.sets + "×" + it.reps + " · " + ic("timer", "xs") + fmtDur(it.rest);
+  return it.sets + "×" + it.reps + " · " + (it.kg ? fmtKg(it.kg) + " " + unit() : t("bwShort")) + " · " + ic("timer", "xs") + fmtDur(it.rest);
 }
 const key = (name) => String(name).trim().toLowerCase();
 const isTimed = (name, part) => part === "Cardio" || TIMED.has(key(name));
 // (a function declaration, so loading old data can use it before this line runs)
-function complete(it) { return it.done.length >= (it.kind === "time" ? 1 : it.sets); }
+// A skipped exercise counts as dealt with, so the workout moves past it.
+function complete(it) { return !!it.skipped || it.done.length >= (it.kind === "time" ? 1 : it.sets); }
 
 /* ------------------------------------------------------------------ */
 /*  Library: everything you've done, so repeats are one tap            */
@@ -402,33 +410,58 @@ function route() {
 /* ------------------------------------------------------------------ */
 /*  Home: trainings                                                    */
 /* ------------------------------------------------------------------ */
+// Home is one of two things: Train (follow a planned training) or Plan (make or edit one).
+// While a workout runs it shows only that workout.
+const homeMode = () => (state.settings.home === "plan" ? "plan" : "train");
+
+// The training you've gone longest without doing: what's up next in your rotation.
+function upNext() {
+  const lastDone = (tr) => Math.max(0, ...state.workouts.filter((w) => w.trainingId === tr.id).map((w) => w.start));
+  let best = null;
+  state.trainings.forEach((tr) => { if (!best || lastDone(tr) < lastDone(best)) best = tr; });
+  return best;
+}
+
 function renderHome() {
   const a = state.active;
+  const has = state.trainings.length > 0;
+  const mode = homeMode();
   $("#resume").hidden = !a;
+  $("#home-mode").hidden = !!a || !has;
+  $("#tr-list").hidden = !!a;
+  $("#new-tr").hidden = !!a || (has && mode === "train");
   if (a) {
     $("#resume-name").textContent = a.name;
     $("#resume-clock").textContent = fmtDur((Date.now() - a.start) / 1000);
+    return;
   }
+  $$("#home-mode button").forEach((b) => b.classList.toggle("on", b.dataset.v === mode));
   const list = $("#tr-list");
   list.innerHTML = "";
-  state.trainings.forEach((tr) => {
-    if (a && a.trainingId === tr.id) return; // the green bar above already stands for it
-    const el = document.createElement("div");
-    el.className = "tr";
+  const next = mode === "train" ? upNext() : null;
+  const trs = next ? [next, ...state.trainings.filter((x) => x !== next)] : state.trainings;
+  trs.forEach((tr) => {
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "tr" + (tr === next && trs.length > 1 ? " next" : "");
     el.innerHTML =
-      '<div class="tr-main"><div class="tr-name">' + escapeHtml(tr.name) + "</div>" +
-      '<div class="tr-sub">' + escapeHtml(tr.items.map((i) => i.name).join(" · ")) + "</div></div>" +
-      '<button class="play" type="button" aria-label="' + t("start") + '">' + ic("play") + "</button>";
-    el.querySelector(".tr-main").onclick = () => openPlan(tr.id);
-    el.querySelector(".play").onclick = () => startTraining(tr.id);
+      '<span class="tr-main">' + (tr === next && trs.length > 1 ? '<span class="tr-badge">' + t("upNext") + "</span>" : "") +
+      '<span class="tr-name">' + escapeHtml(tr.name) + "</span>" +
+      '<span class="tr-sub">' + escapeHtml(tr.items.map((i) => i.name).join(" · ")) + "</span></span>" +
+      (mode === "train" ? '<span class="play">' + ic("play") + "</span>" : '<span class="tr-edit">' + ic("edit") + "</span>");
+    el.setAttribute("aria-label", (mode === "train" ? t("start") : t("edit")) + " " + tr.name);
+    el.onclick = () => (mode === "train" ? startTraining(tr.id) : openPlan(tr.id));
     list.appendChild(el);
   });
-  $("#new-tr").classList.toggle("first", !state.trainings.length);
+  $("#new-tr").classList.toggle("first", !has);
 }
+
+$$("#home-mode button").forEach((b) => (b.onclick = () => { state.settings.home = b.dataset.v; save(); haptic(); renderHome(); }));
 
 $("#resume").onclick = () => { showScreen("screen-do"); renderDo(); };
 
 $("#new-tr").onclick = () => {
+  state.settings.home = "plan";
   const tr = { id: uid(), name: t("training") + " " + (state.trainings.length + 1), auto: true, items: [] };
   state.trainings.push(tr);
   save();
@@ -529,6 +562,7 @@ function startTraining(id) {
     return;
   }
   if (!tr.items.length) { toast(t("empty"), true); return; }
+  state.settings.home = "train";
   // src: the plan item it came from, so the finish can tell extras and removals apart
   state.active = {
     id: uid(), trainingId: tr.id, name: tr.name, start: Date.now(), idx: 0, rest: null, phase: null, segs: [],
@@ -561,7 +595,7 @@ function setPhase(k) {
   const last = a.segs[a.segs.length - 1];
   if (last && last.t1 == null) last.t1 = now;
   a.phase = k;
-  if (k !== "end") a.segs.push({ k, i: a.idx, t0: now });
+  if (k !== "end") a.segs.push({ k, id: a.items[a.idx].id, t0: now });
 }
 
 // Go to an exercise: straight back into it if it's under way, else its start screen.
@@ -583,10 +617,13 @@ function lineHtml(w) {
   }).join("");
 }
 
-// Active time per exercise, from the "ex" blocks.
+// Active time per exercise id, from the "ex" blocks (older ones point by index).
 function exTimes(w) {
   const t = new Map();
-  (w.segs || []).forEach((g) => { if (g.k === "ex") t.set(g.i, (t.get(g.i) || 0) + ((g.t1 || w.end || Date.now()) - g.t0)); });
+  (w.segs || []).forEach((g) => {
+    const id = g.id || (w.items[g.i] && w.items[g.i].id);
+    if (g.k === "ex") t.set(id, (t.get(id) || 0) + ((g.t1 || w.end || Date.now()) - g.t0));
+  });
   return t;
 }
 
@@ -606,6 +643,10 @@ function renderDo() {
   $("#do-end").hidden = ph !== "end";
   $("#do-ready").hidden = ph !== "ready";
   $("#do-ex").hidden = ph !== "ex";
+  // later: only before you start it, and only if there's something to do instead
+  $("#do-ctl").hidden = ph === "end";
+  $("#ctl-later").hidden = ph !== "ready" || nextOpen(a.idx) < 0;
+  $("#ctl-skip").hidden = ph === "rest";
   if (ph === "rest") return renderRest();
   if (ph === "end") return renderEnd();
 
@@ -616,7 +657,7 @@ function renderDo() {
     $("#ready-part").textContent = partName(it.part);
     $("#ready-spec").innerHTML = it.kind === "time"
       ? "<b>" + fmtDur(it.time) + "</b>" + [it.km ? num(it.km) + " km" : "", it.level ? "L" + it.level : ""].filter(Boolean).map((x) => "<small>" + x + "</small>").join("")
-      : "<b>" + (it.kg ? fmtKg(it.kg) + "<em>" + unit() + "</em>" : t("bwShort")) + " × " + it.reps + "</b><small>" + t("nSets", it.sets) + "</small>";
+      : "<b>" + it.reps + " × " + (it.kg ? fmtKg(it.kg) + "<em>" + unit() + "</em>" : t("bwShort")) + "</b><small>" + t("nSets", it.sets) + "</small>";
     return;
   }
 
@@ -641,8 +682,9 @@ function renderDo() {
     doneBtn.hidden = el < 1;
   } else {
     big.className = "do-big";
-    big.innerHTML = "<b>" + fmtKg(it.kg) + "</b>" + (it.kg ? "<small>" + unit() + "</small>" : "") +
-      '<span class="x">×</span><b>' + it.reps + "</b>";
+    // reps first: "10 × 20 kg"
+    big.innerHTML = "<b>" + it.reps + '</b><span class="x">×</span><b>' + fmtKg(it.kg) + "</b>" +
+      (it.kg ? "<small>" + unit() + "</small>" : "");
     let dots = "";
     for (let i = 0; i < Math.max(it.sets, it.done.length); i++) {
       dots += '<button class="dot' + (i < it.done.length ? " on" : "") + '" data-i="' + i + '" type="button">' + (i < it.done.length ? ic("check") : "") + "</button>";
@@ -705,9 +747,9 @@ function statsHtml(st) {
 // Each exercise and how long it took.
 function splitHtml(w) {
   const times = exTimes(w);
-  return w.items.map((it, i) => !it.done.length ? "" :
+  return w.items.map((it) => !it.done.length ? "" :
     '<div class="sp-row"><span>' + escapeHtml(it.name) + (it.extra ? ' <i class="plus-tag">+</i>' : "") + "</span><span>" +
-    (times.get(i) ? fmtDur(times.get(i) / 1000) : "") + "</span></div>").join("");
+    (times.get(it.id) ? fmtDur(times.get(it.id) / 1000) : "") + "</span></div>").join("");
 }
 
 // Tick a set (reps) or finish a timed exercise, then rest and/or move on.
@@ -721,6 +763,7 @@ function doneSet() {
   } else {
     it.done.push({ kg: it.kg, reps: it.reps, at: Date.now() });
   }
+  it.skipped = false;
   haptic();
   const finished = complete(it);
   const nxt = finished ? nextOpen(a.idx) : a.idx;
@@ -743,6 +786,7 @@ function doneSet() {
 
 $("#ready-go").onclick = () => {
   const it = cur();
+  it.skipped = false;
   setPhase("ex");
   // a timed exercise starts its stopwatch on the same tap
   if (it.kind === "time" && !(it.run && it.run.from)) it.run = { acc: it.run ? it.run.acc : 0, from: Date.now() };
@@ -792,6 +836,54 @@ $("#rest-skip").onclick = () => { haptic(); endRest(); };
 
 $("#do-min").onclick = () => { showScreen("screen-home"); renderHome(); };
 
+// A timed exercise you stop part-way still counts for the time you did.
+function keepRun(it) {
+  if (it.kind === "time" && !it.done.length && elapsed(it) >= 1) it.done = [{ time: Math.round(elapsed(it)), km: it.km, level: it.level, at: Date.now() }];
+  it.run = null;
+}
+
+// Skip: pass on this exercise today (sets already done stay done).
+$("#ctl-skip").onclick = () => {
+  const a = state.active;
+  const snap = snapshot();
+  const it = cur();
+  keepRun(it);
+  it.skipped = true;
+  const nxt = nextOpen(a.idx);
+  if (nxt < 0) { a.rest = null; setPhase("end"); } else goTo(nxt);
+  save();
+  haptic();
+  renderDo();
+  toast(t("skipped", it.name), false, { label: t("undo"), fn: () => { restore(snap); showScreen("screen-do"); renderDo(); } });
+};
+
+// Later: the machine is taken, do the next one first and come back to this.
+$("#ctl-later").onclick = () => {
+  const a = state.active;
+  const it = cur();
+  const nxt = a.items[nextOpen(a.idx)];
+  a.items.splice(a.idx, 1);
+  a.items.splice(a.items.indexOf(nxt) + 1, 0, it);
+  goTo(a.items.indexOf(nxt));
+  save();
+  haptic();
+  renderDo();
+  toast(t("movedLater", it.name));
+};
+
+// End now: whatever is left is skipped, and you land on the summary to finish.
+$("#ctl-stop").onclick = () => {
+  const a = state.active;
+  const snap = snapshot();
+  a.items.forEach((it) => { if (!complete(it)) { keepRun(it); it.skipped = true; } });
+  a.rest = null;
+  setPhase("end");
+  save();
+  haptic();
+  renderDo();
+  toast(t("endedEarly"), false, { label: t("undo"), fn: () => { restore(snap); showScreen("screen-do"); renderDo(); } });
+};
+
 // swipe left / right to move between exercises
 (function swipe() {
   ["#do-ex", "#do-ready"].forEach((sel) => {
@@ -827,15 +919,30 @@ function openOver() {
   a.items.forEach((it, i) => {
     const b = document.createElement("button");
     b.type = "button";
-    b.className = "over-row" + (i === a.idx ? " cur" : "") + (complete(it) ? " done" : "");
-    const prog = it.kind === "time" ? (complete(it) ? ic("check") : "") : it.done.length + "/" + it.sets;
+    b.className = "over-row" + (i === a.idx ? " cur" : "") + (it.skipped ? " skipped" : complete(it) ? " done" : "");
+    const prog = it.skipped ? ic("skip") : it.kind === "time" ? (complete(it) ? ic("check") : "") : it.done.length + "/" + it.sets;
     b.innerHTML = '<span class="or-name">' + escapeHtml(it.name) + (it.extra ? ' <i class="plus-tag">+</i>' : "") + '</span><span class="or-prog">' + prog + "</span>";
-    b.onclick = () => { goTo(i); save(); closeOver(); renderDo(); };
+    b.onclick = () => { doNow(i); save(); haptic(); closeOver(); renderDo(); };
     list.appendChild(b);
   });
   $("#sheet-over").hidden = false;
 }
 function closeOver() { $("#sheet-over").hidden = true; }
+
+// Tap an exercise in the list to do it now. One further down that you haven't
+// started moves up to here, so the order you really did them in is what's kept.
+function doNow(i) {
+  const a = state.active;
+  const it = a.items[i];
+  const c = cur();
+  it.skipped = false;
+  if (it === c) return;
+  if (i > a.idx && !it.done.length) {
+    a.items.splice(i, 1);
+    a.items.splice(a.items.indexOf(c) + (c.done.length ? 1 : 0), 0, it);
+  }
+  goTo(a.items.indexOf(it));
+}
 $("#do-list").onclick = openOver;
 $("#sheet-over").onclick = (e) => { if (e.target.id === "sheet-over") closeOver(); };
 $("#over-add").onclick = () => { closeOver(); openPick("do"); };
@@ -852,7 +959,7 @@ function finishWorkout() {
   const a = state.active;
   const snap = snapshot();
   // a stopwatch still running counts up to now
-  a.items.forEach((it) => { if (it.kind === "time" && !it.done.length && elapsed(it) >= 1) it.done = [{ time: Math.round(elapsed(it)), km: it.km, level: it.level, at: Date.now() }]; it.run = null; });
+  a.items.forEach(keepRun);
   const st = workoutStats(a);
   state.active = null;
   if (!st.sets) {
@@ -869,6 +976,7 @@ function finishWorkout() {
   delete a.rest;
   delete a.idx;
   delete a.phase;
+  a.items.forEach((it) => delete it.skipped);
   state.workouts.push(a);
   save();
   showScreen("screen-home");
