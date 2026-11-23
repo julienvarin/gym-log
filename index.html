@@ -56,13 +56,8 @@
         <span class="resume-ic"><svg class="ic"><use href="#i-play"/></svg></span>
         <span class="resume-main"><b id="resume-name"></b><span id="resume-clock"></span></span>
       </button>
-      <!-- the two things you do here: follow a training, or plan one -->
-      <div id="home-mode" class="seg mode" hidden>
-        <button type="button" data-v="train"><svg class="ic"><use href="#i-play"/></svg><span data-i18n="train"></span></button>
-        <button type="button" data-v="plan"><svg class="ic"><use href="#i-edit"/></svg><span data-i18n="planMode"></span></button>
-      </div>
       <div id="tr-list" class="card-list"></div>
-      <button id="new-tr" class="add-card" type="button"><svg class="ic"><use href="#i-plus"/></svg><span class="add-lbl" data-i18n="planTr"></span></button>
+      <button id="new-tr" class="add-card" type="button"><svg class="ic"><use href="#i-plus"/></svg><span class="add-lbl" data-i18n="newTr"></span></button>
     </div>
   </section>
 
@@ -70,10 +65,15 @@
   <section id="screen-plan" class="screen">
     <header class="topbar">
       <button id="plan-back" class="icon-btn" data-i18n-aria="back"><svg class="ic"><use href="#i-back"/></svg></button>
-      <button id="plan-name" class="title-btn" type="button"></button>
+      <span class="progress" data-i18n="training"></span>
       <button id="plan-del" class="icon-btn del" data-i18n-aria="del"><svg class="ic"><use href="#i-trash"/></svg></button>
     </header>
     <div class="scroll">
+      <!-- the training's name: tap and type, saved as you go -->
+      <label class="name-edit">
+        <input id="plan-title" class="name-input" type="text" enterkeyhint="done" autocomplete="off" autocapitalize="words" data-i18n-ph="nameTplPh" />
+        <svg class="ic"><use href="#i-edit"/></svg>
+      </label>
       <div id="plan-list" class="card-list"></div>
       <button id="plan-add" class="add-card" type="button"><svg class="ic"><use href="#i-plus"/></svg><span class="add-lbl" data-i18n="addEx"></span></button>
     </div>
@@ -160,6 +160,7 @@
         <span id="ready-part" class="part-tag"></span>
       </div>
       <button id="ready-spec" class="ready-spec" type="button" data-i18n-aria="edit"></button>
+      <div id="tw-ready" class="tweak"></div>
       <button id="ready-go" class="do-main go" type="button" data-i18n-aria="start"><svg class="ic xl"><use href="#i-play"/></svg></button>
     </div>
 
@@ -171,6 +172,7 @@
       </div>
       <button id="do-big" class="do-big" type="button" data-i18n-aria="edit"></button>
       <div id="do-sub" class="do-sub"></div>
+      <div id="tw-ex" class="tweak"></div>
       <div class="do-actions">
         <span class="do-side"></span>
         <button id="do-main" class="do-main" type="button"></button>
@@ -187,6 +189,7 @@
           <div id="rest-next" class="rest-next"></div>
         </div>
       </div>
+      <div id="tw-rest" class="tweak"></div>
       <div class="rest-btns">
         <button id="rest-minus" class="round-btn" type="button">−15</button>
         <button id="rest-skip" class="round-btn big" type="button" data-i18n-aria="skip"><svg class="ic lg"><use href="#i-skip"/></svg></button>
@@ -271,13 +274,27 @@
     </div>
   </section>
 
-  <!-- Name prompt (rename a training) -->
+  <!-- Name prompt: a new training starts with its name -->
   <div id="sheet" class="sheet" hidden>
     <div class="sheet-card">
+      <div class="sheet-q" data-i18n="nameQ"></div>
       <input id="sheet-input" class="field" type="text" enterkeyhint="done" autocomplete="off" autocapitalize="words" data-i18n-ph="nameTplPh" />
+      <div id="sheet-chips" class="chips"></div>
       <div class="row">
         <button id="sheet-cancel" class="btn ghost grow icon-only" type="button" data-i18n-aria="cancel"><svg class="ic"><use href="#i-x"/></svg></button>
         <button id="sheet-ok" class="btn primary grow icon-only" type="button" data-i18n-aria="save"><svg class="ic"><use href="#i-check"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Body parts an exercise works: pick one or more -->
+  <div id="sheet-parts" class="sheet" hidden>
+    <div class="sheet-card">
+      <div id="parts-q" class="sheet-q"></div>
+      <div id="parts-pick" class="chips"></div>
+      <div class="row">
+        <button id="parts-cancel" class="btn ghost grow icon-only" type="button" data-i18n-aria="cancel"><svg class="ic"><use href="#i-x"/></svg></button>
+        <button id="parts-ok" class="btn primary grow icon-only" type="button" data-i18n-aria="save"><svg class="ic"><use href="#i-check"/></svg></button>
       </div>
     </div>
   </div>
