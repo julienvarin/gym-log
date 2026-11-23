@@ -184,18 +184,13 @@ button.part-tag { cursor: pointer; }
 }
 .tr:active { transform: scale(0.99); background: var(--surface-2); }
 .tr.next { border-color: rgba(124, 108, 246, .55); padding-top: 18px; padding-bottom: 18px; }
-.tr-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.tr-main { flex: 1; min-width: 0; display: flex; flex-direction: column; border: none; background: transparent; padding: 0; text-align: left; cursor: pointer; }
 .tr-badge { color: var(--accent); font-size: 12px; font-weight: 700; margin-bottom: 4px; }
 .tr-name { font-size: 18px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tr-sub { color: var(--muted); font-size: 13px; margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tr-edit { width: 44px; height: 44px; border-radius: 50%; background: var(--surface-2); color: var(--muted); display: grid; place-items: center; flex: 0 0 auto; }
 .tr-edit .ic { width: 20px; height: 20px; }
 
-/* Train / Plan: the two things home is for */
-.seg.mode { padding: 6px; }
-.seg.mode button { padding: 15px 8px; font-size: 17px; gap: 8px; }
-.seg.mode button .ic { width: 20px; height: 20px; }
-.seg.mode button.on { background: linear-gradient(160deg, var(--accent), var(--accent-2)); color: #fff; }
 .play {
   width: 52px; height: 52px; border-radius: 50%; border: none; flex: 0 0 auto; cursor: pointer;
   background: linear-gradient(160deg, var(--accent), var(--accent-2)); color: #fff;
@@ -227,6 +222,18 @@ button.part-tag { cursor: pointer; }
 #plan-add:not(.first) .add-lbl { display: none; }
 
 /* ---- plan ---- */
+/* the training's name: looks like a title, types like a field */
+.name-edit {
+  display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 16px; padding: 4px 16px; cursor: text; margin-bottom: 4px;
+}
+.name-edit:focus-within { border-color: var(--accent); }
+.name-edit .ic { color: var(--muted); width: 20px; height: 20px; }
+.name-input {
+  flex: 1; min-width: 0; border: none; background: transparent; color: var(--text); outline: none;
+  font-family: inherit; font-size: 22px; font-weight: 700; padding: 12px 0; user-select: text; -webkit-user-select: text;
+}
+.name-input::placeholder { color: #565663; }
 .row-card {
   display: flex; align-items: center; width: 100%; text-align: left; border: none; cursor: pointer;
   background: var(--surface); border-radius: 16px; padding: 14px 16px;
@@ -528,3 +535,21 @@ button.part-tag { cursor: pointer; }
   padding: 8px 14px; border-radius: 999px; cursor: pointer;
 }
 #toast:not(:has(.toast-act:not([hidden]))) { padding-right: 18px; }
+
+/* body-part sheet: the main part (tapped first) gets a ring */
+.chip.selected.main { box-shadow: 0 0 0 2px #fff inset; }
+#sheet-chips:empty { display: none; }
+input.field { user-select: text; -webkit-user-select: text; }
+
+/* tweak the next set on the spot: weight and reps, one tap each */
+.tweak { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
+.tweak:empty { display: none; }
+.tw-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.tw {
+  min-width: 52px; height: 42px; padding: 0 10px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--surface); font-size: 15px; font-weight: 700; cursor: pointer; font-variant-numeric: tabular-nums;
+}
+.tw:active { transform: scale(0.92); background: var(--surface-2); }
+.tw[data-d^="-"] { color: var(--muted); }
+.tw-val { min-width: 64px; text-align: center; font-size: 15px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+#tw-rest .tw-val { color: var(--text); font-size: 17px; min-width: 84px; }

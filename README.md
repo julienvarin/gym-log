@@ -5,12 +5,17 @@ GitHub Pages, in the same style as [Saver](https://github.com/julienvarin/saver)
 
 **Two modes.**
 
-Home has one switch at the top: **Train** or **Plan**.
+Home lists your trainings (the one you've gone longest without doing sits on top, marked
+*Up next*).
 
-- **Plan** — your trainings, each with ✎ to edit it. **+ Plan a training** makes a new one:
-  add exercises and set each one on the wheel. Nothing is timed while you plan.
-- **Train** — tap a training to start it. The one you've gone longest without doing sits
-  on top, marked *Up next*. While a workout runs, home shows only that workout.
+- **Open a training** — tap its card: see its exercises, rename it (the name at the top is a
+  plain text field: tap and type), add or edit exercises, delete it, or start it.
+- **Start a training** — the round ▶ on its card, or ▶ at the bottom of the training.
+- **New training** — asks for the name first (type one, or tap Push / Pull / Legs / …). A
+  name you already have opens that training instead of making a duplicate. While a workout
+  runs, home shows only that workout.
+- **Body parts** — an exercise of your own (say a cable move) asks what it works: tap one
+  or more parts, the first one is the main one. Tap the part tag on the wheel to change it.
 - **Do** — once started: A big session clock sits on top, with a timeline under it
   that splits the session into blocks: each exercise, each rest, to scale. Every exercise
   starts on its own screen — name, weight × reps, sets — and one big **▶**. Each ✓ ticks a set
@@ -23,6 +28,10 @@ Home has one switch at the top: **Train** or **Plan**.
   reps first: **10 × 20 kg**. **⌄** goes back to your trainings while the
   workout keeps running (a green bar brings you back). The end screen shows how long each
   exercise took.
+- **Tweak on the fly** — under the weight on the exercise screen, on its start screen and
+  on the rest countdown: −5 / −2.5 / +2.5 / +5 (in your unit, following the body part) and
+  −1 / +1 rep. One tap, same screen, the clock keeps running. Each set keeps the weight it
+  was done at, so the history reads e.g. **10×20 · 10×25 · 8×25 kg**.
 - **Changes on the day.** An exercise you add during a workout is marked **+** and kept in the
   history. When you finish, if you added or removed exercises, one question: **Update plan**
   or **Just today**. Either way the plan keeps the weights and reps you used.
@@ -75,6 +84,7 @@ a native app.
 
 ## Customising
 
+- **Training name ideas:** `nameIdeas` in `STR`.
 - **Exercise ideas / body parts:** `PARTS` and `STARTERS` at the top of [`js/app.js`](js/app.js).
 - **Wording, in both languages:** `STR` just below.
 - **Wheel steps and chips:** `FIELDS`, `WSCALE` / `PART_SCALE` (weight per body part) and `PRESETS`.

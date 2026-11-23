@@ -93,6 +93,8 @@ const STR = {
     setOf: (i, n) => "Set " + i + "/" + n, nOfM: (i, n) => i + " / " + n, nSets: (n) => n + (n > 1 ? " sets" : " set"),
     keepQ: (n) => "Update “" + n + "” with today's changes?", keepYes: "Update plan", keepNo: "Just today",
     train: "Train", planMode: "Plan", planTr: "Plan a training", upNext: "Up next",
+    nameQ: "Name your training", nameIdeas: ["Push", "Pull", "Legs", "Upper body", "Lower body", "Full body"],
+    partsQ: (n) => "What does “" + n + "” work?", exists: (n) => "“" + n + "” already exists",
     later: "Do it later", skipEx: "Skip exercise", stopNow: "End now",
     skipped: (n) => "Skipped " + n, movedLater: (n) => n + " later", endedEarly: "Ended early",
   },
@@ -122,6 +124,8 @@ const STR = {
     setOf: (i, n) => "Série " + i + "/" + n, nOfM: (i, n) => i + " / " + n, nSets: (n) => n + (n > 1 ? " séries" : " série"),
     keepQ: (n) => "Mettre à jour « " + n + " » avec les changements du jour" + NB + "?", keepYes: "Mettre à jour", keepNo: "Juste aujourd'hui",
     train: "S'entraîner", planMode: "Planifier", planTr: "Planifier un entraînement", upNext: "À suivre",
+    nameQ: "Nomme ton entraînement", nameIdeas: ["Poussée", "Tirage", "Jambes", "Haut du corps", "Bas du corps", "Full body"],
+    partsQ: (n) => "Que travaille « " + n + " »" + NB + "?", exists: (n) => "« " + n + " » existe déjà",
     later: "Plus tard", skipEx: "Passer l'exercice", stopNow: "Terminer maintenant",
     skipped: (n) => n + " passé", movedLater: (n) => n + " plus tard", endedEarly: "Terminée plus tôt",
   },
@@ -134,7 +138,8 @@ const STORE = "gymlog.v1";
 /* ------------------------------------------------------------------ */
 // trainings: the plans, each { id, name, auto, items: [item] }.
 //   auto: the name follows the body parts until you rename it.
-// item: { id, name, part, kind, kg, reps, sets, rest, time, km, level }
+// item: { id, name, part, parts, kind, kg, reps, sets, rest, time, km, level }
+//   parts: every body part it works, main one first; part is that main one.
 // active: the workout being done, or null. A copy of a training whose items also
 //   carry done: [{ kg, reps, at }] (reps) or [{ time, km, level, at }] (time), plus
 //   run: { acc, from } for the stopwatch of a timed exercise, and skipped: true
@@ -149,10 +154,17 @@ function blank() {
   return { trainings: [], workouts: [], active: null, settings: { sound: true, awake: true, lang, unit, home: "train" } };
 }
 
+// Every body part an exercise works, main one first (older data has just `part`).
+function partsOf(it) {
+  const ps = Array.isArray(it.parts) && it.parts.length ? it.parts : it.part ? [it.part] : [];
+  return ps.filter((p, i) => PARTS.includes(p) && ps.indexOf(p) === i);
+}
+
 function normItem(it) {
   const kind = it.kind === "time" ? "time" : "reps";
+  const parts = partsOf(it);
   return {
-    id: it.id || uid(), name: it.name, part: it.part || "", kind,
+    id: it.id || uid(), name: it.name, part: parts[0] || "", parts, kind,
     kg: it.kg ?? DEFAULTS.kg, reps: it.reps ?? DEFAULTS.reps, sets: kind === "time" ? 1 : it.sets ?? DEFAULTS.sets,
     rest: it.rest ?? DEFAULTS.rest, time: it.time ?? DEFAULTS.time, km: it.km ?? 0, level: it.level ?? 0,
   };
@@ -211,6 +223,8 @@ function t(k, ...args) {
   return typeof v === "function" ? v(...args) : v;
 }
 const partName = (p) => (p ? t(p) : "");
+// "Chest · Shoulders"
+const partsName = (ps) => ps.map(partName).join(" · ");
 // Small inline icon from the sprite in index.html.
 const ic = (name, cls) => '<svg class="ic' + (cls ? " " + cls : "") + '" aria-hidden="true"><use href="#i-' + name + '"/></svg>';
 
@@ -370,7 +384,7 @@ function specHtml(it) {
   return it.sets + "×" + it.reps + " · " + (it.kg ? fmtKg(it.kg) + " " + unit() : t("bwShort")) + " · " + ic("timer", "xs") + fmtDur(it.rest);
 }
 const key = (name) => String(name).trim().toLowerCase();
-const isTimed = (name, part) => part === "Cardio" || TIMED.has(key(name));
+const isTimed = (name, parts) => [].concat(parts).includes("Cardio") || TIMED.has(key(name));
 // (a function declaration, so loading old data can use it before this line runs)
 // A skipped exercise counts as dealt with, so the workout moves past it.
 function complete(it) { return !!it.skipped || it.done.length >= (it.kind === "time" ? 1 : it.sets); }
@@ -408,9 +422,8 @@ function route() {
 /* ------------------------------------------------------------------ */
 /*  Home: trainings                                                    */
 /* ------------------------------------------------------------------ */
-// Home is one of two things: Train (follow a planned training) or Plan (make or edit one).
-// While a workout runs it shows only that workout.
-const homeMode = () => (state.settings.home === "plan" ? "plan" : "train");
+// Home lists your trainings. Tap one to open it (see it, rename it, change it,
+// start it); the round ▶ starts it straight away. While a workout runs it shows only that.
 
 // The training you've gone longest without doing: what's up next in your rotation.
 function upNext() {
@@ -423,49 +436,72 @@ function upNext() {
 function renderHome() {
   const a = state.active;
   const has = state.trainings.length > 0;
-  const mode = homeMode();
   $("#resume").hidden = !a;
-  $("#home-mode").hidden = !!a || !has;
   $("#tr-list").hidden = !!a;
-  $("#new-tr").hidden = !!a || (has && mode === "train");
+  $("#new-tr").hidden = !!a;
   if (a) {
     $("#resume-name").textContent = a.name;
     $("#resume-clock").textContent = fmtDur((Date.now() - a.start) / 1000);
     return;
   }
-  $$("#home-mode button").forEach((b) => b.classList.toggle("on", b.dataset.v === mode));
   const list = $("#tr-list");
   list.innerHTML = "";
-  const next = mode === "train" ? upNext() : null;
+  const next = upNext();
   const trs = next ? [next, ...state.trainings.filter((x) => x !== next)] : state.trainings;
   trs.forEach((tr) => {
-    const el = document.createElement("button");
-    el.type = "button";
-    el.className = "tr" + (tr === next && trs.length > 1 ? " next" : "");
+    const isNext = tr === next && trs.length > 1;
+    const el = document.createElement("div");
+    el.className = "tr" + (isNext ? " next" : "");
     el.innerHTML =
-      '<span class="tr-main">' + (tr === next && trs.length > 1 ? '<span class="tr-badge">' + t("upNext") + "</span>" : "") +
+      '<button type="button" class="tr-main">' + (isNext ? '<span class="tr-badge">' + t("upNext") + "</span>" : "") +
       '<span class="tr-name">' + escapeHtml(tr.name) + "</span>" +
-      '<span class="tr-sub">' + escapeHtml(tr.items.map((i) => i.name).join(" · ")) + "</span></span>" +
-      (mode === "train" ? '<span class="play">' + ic("play") + "</span>" : '<span class="tr-edit">' + ic("edit") + "</span>");
-    el.setAttribute("aria-label", (mode === "train" ? t("start") : t("edit")) + " " + tr.name);
-    el.onclick = () => (mode === "train" ? startTraining(tr.id) : openPlan(tr.id));
+      '<span class="tr-sub">' + escapeHtml(tr.items.map((i) => i.name).join(" · ")) + "</span></button>" +
+      (tr.items.length ? '<button type="button" class="play">' + ic("play") + "</button>" : "");
+    const main = el.querySelector(".tr-main");
+    main.setAttribute("aria-label", t("edit") + " " + tr.name);
+    main.onclick = () => openPlan(tr.id);
+    const play = el.querySelector(".play");
+    if (play) { play.setAttribute("aria-label", t("start") + " " + tr.name); play.onclick = () => startTraining(tr.id); }
     list.appendChild(el);
   });
   $("#new-tr").classList.toggle("first", !has);
 }
 
-$$("#home-mode button").forEach((b) => (b.onclick = () => { state.settings.home = b.dataset.v; save(); haptic(); renderHome(); }));
-
 $("#resume").onclick = () => { showScreen("screen-do"); renderDo(); };
 
-$("#new-tr").onclick = () => {
-  state.settings.home = "plan";
-  const tr = { id: uid(), name: t("training") + " " + (state.trainings.length + 1), auto: true, items: [] };
-  state.trainings.push(tr);
-  save();
-  planId = tr.id;
-  openPick("plan");
-};
+// A new training starts with its name: type one, or tap an idea.
+// A name you already have opens that training instead of making a second one.
+$("#new-tr").onclick = () => askNewName();
+
+function askNewName() {
+  const inp = $("#sheet-input");
+  inp.value = "";
+  const have = new Set(state.trainings.map((x) => key(x.name)));
+  const chips = $("#sheet-chips");
+  chips.innerHTML = "";
+  t("nameIdeas").filter((n) => !have.has(key(n))).forEach((n) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip";
+    b.textContent = n;
+    b.onclick = () => { inp.value = n; sheetFn(); };
+    chips.appendChild(b);
+  });
+  $("#sheet").hidden = false;
+  sheetFn = () => {
+    const name = inp.value.trim();
+    if (!name) { inp.focus(); return; }
+    closeSheet();
+    haptic();
+    const same = state.trainings.find((x) => key(x.name) === key(name));
+    if (same) { openPlan(same.id); toast(t("exists", same.name)); return; }
+    const tr = { id: uid(), name: name.charAt(0).toUpperCase() + name.slice(1), auto: false, items: [] };
+    state.trainings.push(tr);
+    save();
+    openPlan(tr.id);
+  };
+  setTimeout(() => inp.focus(), 50);
+}
 
 /* ------------------------------------------------------------------ */
 /*  Plan: one training's exercises                                     */
@@ -476,7 +512,7 @@ const plan = () => state.trainings.find((x) => x.id === planId);
 function autoName(tr) {
   if (!tr.auto) return;
   const parts = [];
-  tr.items.forEach((it) => { if (it.part && parts.indexOf(it.part) < 0) parts.push(it.part); });
+  tr.items.forEach((it) => partsOf(it).forEach((p) => { if (parts.indexOf(p) < 0) parts.push(p); }));
   if (parts.length) tr.name = parts.slice(0, 3).map(partName).join(" + ");
 }
 
@@ -488,7 +524,7 @@ function openPlan(id) {
 
 function renderPlan() {
   const tr = plan();
-  $("#plan-name").textContent = tr.name;
+  if (document.activeElement !== $("#plan-title")) $("#plan-title").value = tr.name;
   const list = $("#plan-list");
   list.innerHTML = "";
   tr.items.forEach((it) => {
@@ -496,7 +532,7 @@ function renderPlan() {
     el.type = "button";
     el.className = "row-card";
     el.innerHTML =
-      '<span class="rc-main"><span class="rc-name">' + escapeHtml(it.name) + '<span class="part-tag">' + escapeHtml(partName(it.part)) + "</span></span>" +
+      '<span class="rc-main"><span class="rc-name">' + escapeHtml(it.name) + '<span class="part-tag">' + escapeHtml(partsName(partsOf(it))) + "</span></span>" +
       '<span class="rc-spec">' + specHtml(it) + "</span></span>";
     el.onclick = () => openWheel({ ctx: "plan", mode: "edit", item: it });
     list.appendChild(el);
@@ -506,15 +542,23 @@ function renderPlan() {
 }
 
 $("#plan-back").onclick = () => {
-  const tr = plan();
-  // a training you never put anything in isn't a training
-  if (tr && !tr.items.length) { state.trainings = state.trainings.filter((x) => x !== tr); save(); }
+  $("#plan-title").blur();
   showScreen("screen-home");
   renderHome();
 };
 $("#plan-add").onclick = () => openPick("plan");
 $("#plan-start").onclick = () => startTraining(planId);
-$("#plan-name").onclick = () => askName(plan());
+// the name is a plain field: type, and it's saved
+$("#plan-title").addEventListener("input", (e) => {
+  const tr = plan();
+  const name = e.target.value.trim();
+  if (!tr || !name) return;
+  tr.name = name;
+  tr.auto = false;
+  save();
+});
+$("#plan-title").addEventListener("blur", (e) => { const tr = plan(); if (tr && !e.target.value.trim()) e.target.value = tr.name; });
+$("#plan-title").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); e.target.blur(); } });
 $("#plan-del").onclick = () => {
   const tr = plan();
   const snap = snapshot();
@@ -525,23 +569,8 @@ $("#plan-del").onclick = () => {
   toast(t("deleted", tr.name), false, { label: t("undo"), fn: () => restore(snap) });
 };
 
-// Rename sheet.
+// Name sheet (a new training).
 let sheetFn = null;
-function askName(tr) {
-  const inp = $("#sheet-input");
-  inp.value = tr.name;
-  $("#sheet").hidden = false;
-  sheetFn = () => {
-    const name = inp.value.trim();
-    if (!name) return;
-    tr.name = name;
-    tr.auto = false;
-    save();
-    closeSheet();
-    renderPlan();
-  };
-  setTimeout(() => { inp.focus(); inp.select(); }, 50);
-}
 function closeSheet() { $("#sheet").hidden = true; $("#sheet-input").blur(); sheetFn = null; }
 $("#sheet-ok").onclick = () => sheetFn && sheetFn();
 $("#sheet-cancel").onclick = closeSheet;
@@ -554,17 +583,21 @@ $("#sheet-input").addEventListener("keydown", (e) => { if (e.key === "Enter") { 
 function startTraining(id) {
   const tr = state.trainings.find((x) => x.id === id);
   if (!tr) return;
+  startWorkout(tr.name, tr.items, tr.id);
+}
+
+// trainingId: the plan it follows, or null (a workout redone from history whose plan is gone)
+function startWorkout(name, items, trainingId) {
   if (state.active) {
-    if (state.active.trainingId !== id) toast(t("finishFirst"), true);
+    if (!trainingId || state.active.trainingId !== trainingId) toast(t("finishFirst"), true);
     else { showScreen("screen-do"); renderDo(); }
     return;
   }
-  if (!tr.items.length) { toast(t("empty"), true); return; }
-  state.settings.home = "train";
+  if (!items.length) { toast(t("empty"), true); return; }
   // src: the plan item it came from, so the finish can tell extras and removals apart
   state.active = {
-    id: uid(), trainingId: tr.id, name: tr.name, start: Date.now(), idx: 0, rest: null, phase: null, segs: [],
-    items: tr.items.map((it) => ({ ...normItem(it), id: uid(), src: it.id, done: [], run: null })),
+    id: uid(), trainingId, name, start: Date.now(), idx: 0, rest: null, phase: null, segs: [],
+    items: items.map((it) => ({ ...normItem(it), id: uid(), src: trainingId ? it.id : undefined, done: [], run: null })),
   };
   setPhase("ready");
   save();
@@ -651,6 +684,7 @@ function renderDo() {
   $("#do-ctl").hidden = ph === "end";
   $("#ctl-later").hidden = ph !== "ready" || nextOpen(a.idx) < 0;
   $("#ctl-skip").hidden = ph === "rest";
+  renderTweak(ph);
   if (ph === "rest") return renderRest();
   if (ph === "end") return renderEnd();
 
@@ -658,7 +692,7 @@ function renderDo() {
   if (ph === "ready") {
     $("#ready-count").textContent = t("nOfM", a.idx + 1, a.items.length);
     $("#ready-name").textContent = it.name;
-    $("#ready-part").textContent = partName(it.part);
+    $("#ready-part").textContent = partsName(partsOf(it));
     $("#ready-spec").innerHTML = it.kind === "time"
       ? "<b>" + fmtDur(it.time) + "</b>" + [it.km ? num(it.km) + " km" : "", it.level ? "L" + it.level : ""].filter(Boolean).map((x) => "<small>" + x + "</small>").join("")
       : "<b>" + it.reps + " × " + (it.kg ? fmtKg(it.kg) + "<em>" + unit() + "</em>" : t("bwShort")) + "</b><small>" + t("nSets", it.sets) + "</small>";
@@ -666,7 +700,7 @@ function renderDo() {
   }
 
   $("#do-name").textContent = it.name;
-  $("#do-part").textContent = partName(it.part);
+  $("#do-part").textContent = partsName(partsOf(it));
   const big = $("#do-big");
   const main = $("#do-main");
   const doneBtn = $("#do-done");
@@ -699,6 +733,41 @@ function renderDo() {
     doneBtn.hidden = true;
   }
 }
+
+// Tweak on the spot: one tap changes the weight or reps of the set coming up,
+// without leaving the screen or touching the clock. Each set keeps the weight it
+// was done at, so 20 / 25 / 25 kg is three sets of one exercise.
+function tweakSteps() {
+  const st = wscale(cur().part).step;
+  return Array.from(new Set([st, 5])).sort((x, y) => x - y);
+}
+function renderTweak(ph) {
+  ["ready", "ex", "rest"].forEach((k) => { $("#tw-" + k).innerHTML = ""; });
+  const a = state.active;
+  const it = a.items[a.idx];
+  if (!it || it.kind === "time" || !["ready", "ex", "rest"].includes(ph)) return;
+  const steps = tweakSteps();
+  const btn = (f, d, label) => '<button type="button" class="tw" data-f="' + f + '" data-d="' + d + '">' + label + "</button>";
+  const kgVal = it.kg ? fmtKg(it.kg) + " " + unit() : t("bwShort");
+  // on the rest screen the values are spelled out: that's the set you're about to do
+  const showVal = ph === "rest";
+  $("#tw-" + ph).innerHTML =
+    '<div class="tw-row">' + steps.slice().reverse().map((d) => btn("kg", -d, "−" + num(d))).join("") +
+    '<span class="tw-val">' + (showVal ? kgVal : unit()) + "</span>" +
+    steps.map((d) => btn("kg", d, "+" + num(d))).join("") + "</div>" +
+    '<div class="tw-row">' + btn("reps", -1, "−1") + '<span class="tw-val">' + (showVal ? it.reps + " " : "") + t("f_reps") + "</span>" + btn("reps", 1, "+1") + "</div>";
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest(".tw");
+  if (!b || !state.active) return;
+  const it = cur();
+  const d = +b.dataset.d;
+  if (b.dataset.f === "kg") it.kg = fromU(Math.max(0, Math.round((toU(it.kg) + d) * 100) / 100));
+  else it.reps = Math.min(100, Math.max(1, it.reps + d));
+  haptic();
+  save();
+  renderDo();
+});
 
 function pulse(sel) {
   const m = $(sel);
@@ -1098,10 +1167,10 @@ function renderSuggest() {
   $("#name-next").hidden = !q;
   const lib = library();
   const taken = new Set(pickItems().map((i) => key(i.name)));
-  const match = (name, part) => (q ? key(name).includes(q) : !pickPart || part === pickPart);
+  const match = (name, parts) => (q ? key(name).includes(q) : !pickPart || [].concat(parts).includes(pickPart));
 
   const recent = Array.from(lib.values())
-    .filter((e) => match(e.name, e.part) && !taken.has(key(e.name)))
+    .filter((e) => match(e.name, e.parts) && !taken.has(key(e.name)))
     .sort((a, b) => b.at - a.at);
   const known = new Set(Array.from(lib.keys()));
   const ideas = [];
@@ -1122,16 +1191,48 @@ function renderSuggest() {
     list.appendChild(b);
   };
   recent.slice(0, 12).forEach((e) => row(e.name, specHtml(e), "recent", () => openWheel({ ctx: pickCtx, mode: "known", vals: e, last: e })));
-  ideas.forEach((e) => row(e.name, escapeHtml(t(e.part)), "", () => openWheel({ ctx: pickCtx, mode: "new", name: e.name, part: e.part })));
+  ideas.forEach((e) => row(e.name, escapeHtml(t(e.part)), "", () => openWheel({ ctx: pickCtx, mode: "new", name: e.name, parts: [e.part] })));
 }
 
 function pickTyped() {
   const name = $("#ex-name").value.trim();
   if (!name) return;
   const e = library().get(key(name));
-  if (e) openWheel({ ctx: pickCtx, mode: "known", vals: e, last: e });
-  else openWheel({ ctx: pickCtx, mode: "new", name: name.charAt(0).toUpperCase() + name.slice(1), part: pickPart || partOf(name) });
+  if (e) { openWheel({ ctx: pickCtx, mode: "known", vals: e, last: e }); return; }
+  const nice = name.charAt(0).toUpperCase() + name.slice(1);
+  const known = partOf(name);
+  if (known) { openWheel({ ctx: pickCtx, mode: "new", name: nice, parts: [known] }); return; }
+  // an exercise of your own (e.g. a cable move): say what it works first
+  askParts(nice, pickPart ? [pickPart] : [], (ps) => openWheel({ ctx: pickCtx, mode: "new", name: nice, parts: ps }));
 }
+
+// Body-part sheet: tap every part the exercise works; the first one you tap is the main one.
+let partsFn = null;
+let partsSel = [];
+function askParts(name, initial, fn) {
+  partsSel = initial.slice();
+  partsFn = fn;
+  $("#parts-q").textContent = t("partsQ", name);
+  renderPartsPick();
+  $("#sheet-parts").hidden = false;
+}
+function renderPartsPick() {
+  const wrap = $("#parts-pick");
+  wrap.innerHTML = "";
+  PARTS.forEach((p) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    const i = partsSel.indexOf(p);
+    b.className = "chip" + (i >= 0 ? " selected" : "") + (i === 0 && partsSel.length > 1 ? " main" : "");
+    b.textContent = t(p);
+    b.onclick = () => { if (i >= 0) partsSel.splice(i, 1); else partsSel.push(p); haptic(); renderPartsPick(); };
+    wrap.appendChild(b);
+  });
+}
+function closeParts() { $("#sheet-parts").hidden = true; partsFn = null; }
+$("#parts-ok").onclick = () => { const fn = partsFn; const ps = partsSel.slice(); closeParts(); if (fn) fn(ps); };
+$("#parts-cancel").onclick = closeParts;
+$("#sheet-parts").onclick = (e) => { if (e.target.id === "sheet-parts") closeParts(); };
 
 $("#ex-name").addEventListener("input", renderSuggest);
 $("#ex-name").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); pickTyped(); } });
@@ -1139,8 +1240,6 @@ $("#name-next").onclick = pickTyped;
 $("#pick-back").onclick = backFromPick;
 function backFromPick() {
   if (pickCtx === "do") { showScreen("screen-do"); renderDo(); return; }
-  const tr = plan();
-  if (tr && !tr.items.length) { state.trainings = state.trainings.filter((x) => x !== tr); save(); showScreen("screen-home"); renderHome(); return; }
   openPlan(planId);
 }
 
@@ -1155,8 +1254,9 @@ let W = null;
 function openWheel(o) {
   const src = o.item || o.vals || null;
   const name = src ? src.name : o.name;
-  const part = src ? src.part : o.part || "";
-  const kind = src ? src.kind : isTimed(name, part) ? "time" : "reps";
+  const parts = src ? partsOf(src) : (o.parts || []).filter(Boolean);
+  const part = parts[0] || "";
+  const kind = src ? src.kind : isTimed(name, parts) ? "time" : "reps";
   const vals = { ...DEFAULTS, ...(src ? normItem(src) : {}) };
   if (!src && TIMED.has(key(name))) vals.time = 60; // a plank isn't ten minutes
   // the wheel works in your unit; a new exercise starts at a weight that suits its body part
@@ -1164,7 +1264,7 @@ function openWheel(o) {
   let last = o.last || library().get(key(name)) || null;
   if (last) last = { ...last, kg: toU(last.kg), best: toU(last.best || 0) };
   W = {
-    ctx: o.ctx, mode: o.mode, item: o.item || null, name, part, kind, vals,
+    ctx: o.ctx, mode: o.mode, item: o.item || null, name, part, parts, kind, vals,
     kg0: src ? { u: vals.kg, kg: src.kg } : null, last,
     field: ORDER[kind][0],
     seen: new Set(o.mode === "new" ? [ORDER[kind][0]] : [...ORDER.reps, ...ORDER.time]),
@@ -1208,7 +1308,7 @@ function renderWheel() {
   const cfg = fieldCfg(f);
   const v = W.vals[f];
 
-  $("#wheel-part").textContent = W.part ? t(W.part) : t("addPart");
+  $("#wheel-part").textContent = W.parts.length ? partsName(W.parts) : t("addPart");
   $$(".fcell").forEach((c) => {
     const k = c.dataset.f;
     c.classList.toggle("active", k === f);
@@ -1327,14 +1427,16 @@ function nextField() {
 }
 
 $("#wheel-part").onclick = () => {
-  // tap the tag to cycle the body part
-  const i = PARTS.indexOf(W.part);
-  const was = wscale(W.part).def;
-  W.part = i < 0 ? PARTS[0] : i === PARTS.length - 1 ? "" : PARTS[i + 1];
-  // an untouched starting weight follows the new body part
-  if (W.mode === "new" && W.vals.kg === was) W.vals.kg = wscale(W.part).def;
-  haptic();
-  renderWheel();
+  // tap the tag to choose the body parts
+  closeInput(true);
+  askParts(W.name, W.parts, (ps) => {
+    const was = wscale(W.part).def;
+    W.parts = ps;
+    W.part = ps[0] || "";
+    // an untouched starting weight follows the new body part
+    if (W.mode === "new" && W.vals.kg === was) W.vals.kg = wscale(W.part).def;
+    renderWheel();
+  });
 };
 
 $("#wheel-kind").onclick = () => {
@@ -1382,7 +1484,7 @@ $("#wheel-del").onclick = () => {
 };
 
 function commitWheel() {
-  const v = { ...W.vals, name: W.name, part: W.part, kind: W.kind };
+  const v = { ...W.vals, name: W.name, part: W.part, parts: W.parts, kind: W.kind };
   // back to kg; an unchanged weight keeps its exact stored value
   v.kg = W.kg0 && W.kg0.u === v.kg ? W.kg0.kg : fromU(v.kg);
   if (W.kind === "time") v.sets = 1;
@@ -1514,10 +1616,14 @@ function doneLine(it) {
     const d = it.done[0];
     return ic("timer", "xs") + fmtDur(d.time) + (d.km ? " · " + num(d.km) + " km" : "") + (d.level ? " · L" + d.level : "");
   }
-  const top = Math.max(...it.done.map((x) => x.kg || 0));
-  const reps = it.done.map((x) => x.reps);
+  const d = it.done;
+  const kgs = d.map((x) => x.kg || 0);
+  const reps = d.map((x) => x.reps);
   const same = reps.every((r) => r === reps[0]);
-  return (same ? it.done.length + "×" + reps[0] : reps.join("/")) + (top ? " · " + fmtKg(top) + " " + unit() : "");
+  const oneKg = kgs.every((k) => k === kgs[0]);
+  if (oneKg) return (same ? d.length + "×" + reps[0] : reps.join("/")) + (kgs[0] ? " · " + fmtKg(kgs[0]) + " " + unit() : "");
+  // the weight changed between sets: every set as reps × weight
+  return d.map((x) => x.reps + "×" + fmtKg(x.kg)).join(" · ") + " " + unit();
 }
 
 function renderHistory() {
@@ -1552,13 +1658,10 @@ function renderHistory() {
       '<button class="mini-btn del" type="button" aria-label="' + t("del") + '">' + ic("trash") + "</button></div>";
     el.querySelector(".rep").onclick = () => {
       if (state.active) { toast(t("finishFirst"), true); return; }
-      // do it again: its training if it still exists, else a new one from it
-      let tr = state.trainings.find((x) => x.id === w.trainingId);
-      if (!tr) {
-        tr = { id: uid(), name: w.name || t("training"), auto: false, items: w.items.map((it) => normItem({ ...it, id: undefined })) };
-        state.trainings.push(tr);
-      }
-      startTraining(tr.id);
+      // do it again: its training if it still exists, else just this once (no new training)
+      const tr = state.trainings.find((x) => x.id === w.trainingId);
+      if (tr) startTraining(tr.id);
+      else startWorkout(w.name || t("training"), w.items.map((it) => normItem({ ...it, id: undefined })), null);
     };
     el.querySelector(".del").onclick = () => {
       const snap = snapshot();
